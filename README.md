@@ -59,7 +59,7 @@ That is the gate CI runs: restore from the lock files, build with every warning 
 
 ## Engineering baseline
 
-The quality rules follow [engineering-baseline](https://github.com/miralem-cebic/engineering-baseline). [baseline.json](baseline.json) sets the profile: ecosystem `csharp`, topology `hosted-db`, with recorded waivers for the browser header rules that do not fit a webhook API. CI runs the conformance check in strict mode; locally:
+The quality rules follow [engineering-baseline](https://github.com/miralem-cebic/engineering-baseline). [baseline.json](baseline.json) sets the profile: ecosystem `csharp`, topology `hosted-db`, surface `api` (a webhook API without browser content, so the API header rules apply instead of the static-site ones). CI runs the conformance check of release v0.2.0 in strict mode; locally:
 
 ```bash
 npx github:miralem-cebic/engineering-baseline check

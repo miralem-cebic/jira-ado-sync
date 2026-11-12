@@ -44,7 +44,7 @@ Legend: `[ ]` open · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] Private vulnerability reporting is enabled; `SECURITY.md` points to it
 
 Moved out of this phase, because they are not foundation work: the schema check (Phase 1) and the conformance pin
-(Maintenance, waiting for engineering-baseline).
+(Maintenance, done with engineering-baseline v0.2.0).
 
 ## Phase 1: walking skeleton
 
@@ -71,8 +71,9 @@ not written back.
 - [ ] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook
 - [ ] Webhook authentication: requests without a valid secret are rejected (shared secret or HMAC, per source;
   DESIGN.md section 9)
-- [ ] Security headers on every response (`X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src
-  'none'; frame-ancestors 'none'`, HSTS). Then remove the HOS waivers from `baseline.json` (they expire 2027-05-31)
+- [ ] Security headers on every response: `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
+  `X-Content-Type-Options: nosniff`, `Cache-Control: no-store` and HSTS. The baseline rules `HOS-009..012`
+  (proposed, surface `api`) then pass
 - [ ] `CA2007` decided for the host project, with the reason next to the setting (ADR 0002)
 - [ ] One log line per event: source, item, the engine's decision (`SkipReason` or apply). No tokens, no field contents
 - [ ] New packages (Functions worker, `Azure.Data.Tables`, `Azure.Identity`) in `docs/dependencies.md`, each used only
@@ -120,11 +121,10 @@ DESIGN.md section 7. v1 is `lastWriteWins`.
 
 Ongoing work outside the phases.
 
-- [!] Move the conformance pin in `ci.yml` to the first engineering-baseline release with the C# rules, and lift the
-  Dependabot ignore for it. Blocked: the latest release is still v0.1.1, which lacks `CSH-007..018` and the `GEN-014`
-  fix for NuGet lock files
-- [ ] Before 2027-05-31: the HOS waivers in `baseline.json` expire. Replace them with the security headers of Phase 1,
-  or with an API-host variant of the rules in engineering-baseline
+- [x] Conformance pinned to the engineering-baseline release v0.2.0, which has the C# rules and `GEN-014` for NuGet
+  lock files; Dependabot moves the pin from now on
+- [x] HOS waivers removed: `baseline.json` declares `"surface": "api"` (engineering-baseline ADR 7), so the
+  static-host header rules no longer apply. The API header rules `HOS-009..012` take their place (Phase 1)
 
 ## Later
 

@@ -64,6 +64,7 @@ CI runs more than `scripts/verify.sh`: ShellCheck, the vulnerable package report
 ## Engineering baseline
 
 The project follows [engineering-baseline](https://github.com/miralem-cebic/engineering-baseline): profile `csharp`,
-topology `hosted-db` (`baseline.json`). A waiver there needs a reason and an expiry date. A C# finding that applies
-beyond this repository (build settings, analyzers, `.editorconfig`, `BannedSymbols.txt`, test projects) also goes
-upstream as a pull request to engineering-baseline.
+topology `hosted-db`, surface `api` (`baseline.json`). The `conformance` job in `ci.yml` pins the release; change
+`"baseline"` in `baseline.json` in the same pull request. A waiver there needs a reason and an expiry date. A C#
+finding that applies beyond this repository (build settings, analyzers, `.editorconfig`, `BannedSymbols.txt`, test
+projects) also goes upstream as a pull request to engineering-baseline.
