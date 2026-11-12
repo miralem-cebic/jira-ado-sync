@@ -21,6 +21,8 @@ public static class SyncConfigLoader
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
+        // DTO properties are PascalCase in C#; the JSON file uses camelCase, as in the schema.
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
         ReadCommentHandling = JsonCommentHandling.Skip,
         AllowTrailingCommas = false,
