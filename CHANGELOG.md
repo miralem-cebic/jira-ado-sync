@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Roadmap (`docs/roadmap.md`): phases from the walking skeleton (Functions host, REST clients, Table Storage state,
+  webhook authentication) to real systems, breadth (creating items, assignee, comments, links, iterations) and
+  conflict policies, with releases, open decisions and what is not planned.
 - Design document (`docs/DESIGN.md`), MIT licence and an example configuration with its JSON Schema.
 - Pure sync engine: echo suppression for the sync's own identity, a hash check over the synced field set,
   status mapping in both directions and last write wins.

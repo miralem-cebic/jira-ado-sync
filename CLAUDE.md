@@ -1,7 +1,8 @@
 # CLAUDE.md
 
 jira-ado-sync keeps Jira Cloud issues and Azure DevOps work items in step, in both directions, as an Azure Function.
-The design is in [docs/DESIGN.md](docs/DESIGN.md); decisions are in [docs/adr/](docs/adr/README.md).
+The design is in [docs/DESIGN.md](docs/DESIGN.md), the plan in [docs/roadmap.md](docs/roadmap.md) (tick items off
+there when they are done), decisions in [docs/adr/](docs/adr/README.md).
 
 ## Commands
 
@@ -58,7 +59,7 @@ CI runs more than `scripts/verify.sh`: ShellCheck, the vulnerable package report
 | `src/JiraAdoSync.Core/Model/` | Side-neutral types: `CanonicalItem`, `SyncEvent`, `SyncState` |
 | `tests/JiraAdoSync.Core.Tests/` | Unit tests; the shipped `config.example.json` is tested too |
 | `config/` | JSON Schema and example configuration |
-| `docs/DESIGN.md`, `docs/adr/` | Architecture and decisions (`/add-adr`) |
+| `docs/DESIGN.md`, `docs/roadmap.md`, `docs/adr/` | Architecture, plan and decisions (`/add-adr`) |
 
 ## Engineering baseline
 

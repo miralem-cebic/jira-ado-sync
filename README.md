@@ -7,7 +7,7 @@ A configurable, bidirectional sync between **Jira Cloud** and **Azure DevOps** w
 
 Atlassian's built-in Azure DevOps connector only syncs in one direction. This project aims to keep both systems in step, so that teams working in either tool see the same state.
 
-> **Status:** early design. The pure core (sync engine, configuration loader, webhook parsers and request builders) exists and is tested; the Azure Functions host, the REST clients and the state store do not exist yet. See [docs/DESIGN.md](docs/DESIGN.md). Nothing is production-ready yet.
+> **Status:** early design. The pure core (sync engine, configuration loader, webhook parsers and request builders) exists and is tested; the Azure Functions host, the REST clients and the state store do not exist yet. See [docs/DESIGN.md](docs/DESIGN.md) and the [roadmap](docs/roadmap.md). Nothing is production-ready yet.
 
 ## Goals
 
@@ -55,7 +55,7 @@ That is the gate CI runs: restore from the lock files, build with every warning 
 | `src/JiraAdoSync.Core/` | Sync engine, configuration, Jira and Azure DevOps payloads. No I/O. |
 | `tests/JiraAdoSync.Core.Tests/` | Unit tests (xUnit v3) |
 | `config/` | JSON Schema and example configuration |
-| `docs/` | [Design](docs/DESIGN.md), [decisions](docs/adr/README.md), [dependencies](docs/dependencies.md) |
+| `docs/` | [Design](docs/DESIGN.md), [roadmap](docs/roadmap.md), [decisions](docs/adr/README.md), [dependencies](docs/dependencies.md) |
 
 ## Engineering baseline
 
