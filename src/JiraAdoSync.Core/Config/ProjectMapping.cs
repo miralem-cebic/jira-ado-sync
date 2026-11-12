@@ -6,14 +6,22 @@ namespace JiraAdoSync.Core.Config;
 /// </summary>
 public sealed class ProjectMapping
 {
+    /// <summary>Identifier of the mapping, e.g. the partition key of the stored state. Currently the Jira project key.</summary>
     public required string Id { get; init; }
+
+    /// <summary>Jira project key, e.g. <c>PROJ</c>.</summary>
     public required string JiraProject { get; init; }
+
+    /// <summary>Azure DevOps project name.</summary>
     public required string AdoProject { get; init; }
+
+    /// <summary>Azure DevOps area path that new work items are created in.</summary>
     public required string AreaPath { get; init; }
 
     /// <summary>Jira status name → ADO state name.</summary>
     public required IReadOnlyDictionary<string, string> StatusMap { get; init; }
 
+    /// <summary>Which fields take part in the sync for this mapping.</summary>
     public FeatureFlags Features { get; init; } = new();
 
     /// <summary>Returns configuration errors. An empty list means the mapping is valid.</summary>

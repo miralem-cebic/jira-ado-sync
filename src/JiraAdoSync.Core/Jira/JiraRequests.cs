@@ -8,8 +8,11 @@ namespace JiraAdoSync.Core.Jira;
 public static class JiraRequests
 {
     /// <summary>Body for PUT /rest/api/3/issue/{key}. Only fields that are not null are included.</summary>
+    /// <param name="item">The field values to write. Null fields are left unchanged.</param>
     public static string BuildIssueUpdate(CanonicalItem item)
     {
+        ArgumentNullException.ThrowIfNull(item);
+
         var fields = new JsonObject();
 
         if (item.Title is not null)

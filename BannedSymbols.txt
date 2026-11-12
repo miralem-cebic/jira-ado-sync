@@ -1,0 +1,29 @@
+T:System.Runtime.CompilerServices.Unsafe;no unsafe memory access
+T:System.Runtime.InteropServices.Marshal;no manual marshalling
+T:System.Runtime.InteropServices.MemoryMarshal;no reinterpretation of memory
+T:System.Runtime.InteropServices.CollectionsMarshal;no access to collection internals
+T:System.Runtime.InteropServices.NativeMemory;no unmanaged memory
+T:System.Net.WebClient;use HttpClient from IHttpClientFactory
+T:Microsoft.CSharp.RuntimeBinder.Binder;no dynamic
+M:System.Threading.Thread.Sleep(System.Int32);use await Task.Delay(..., TimeProvider)
+M:System.Threading.Thread.Sleep(System.TimeSpan);use await Task.Delay(..., TimeProvider)
+M:System.Threading.Tasks.Task.Wait;async all the way
+M:System.Threading.Tasks.Task.Wait(System.Int32);async all the way
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan);async all the way
+M:System.Threading.Tasks.Task.Wait(System.Threading.CancellationToken);async all the way
+M:System.Threading.Tasks.Task.Wait(System.Int32,System.Threading.CancellationToken);async all the way
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan,System.Threading.CancellationToken);async all the way
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[]);use await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[]);use await Task.WhenAny
+M:System.Runtime.CompilerServices.TaskAwaiter.GetResult;async all the way
+M:System.Runtime.CompilerServices.TaskAwaiter`1.GetResult;async all the way
+P:System.Threading.Tasks.Task`1.Result;async all the way
+P:System.DateTime.Now;inject TimeProvider
+P:System.DateTime.UtcNow;inject TimeProvider
+P:System.DateTime.Today;inject TimeProvider
+P:System.DateTimeOffset.Now;inject TimeProvider
+P:System.DateTimeOffset.UtcNow;inject TimeProvider
+M:System.Environment.Exit(System.Int32);let the host shut down
+M:System.GC.Collect;no manual GC
+M:System.Diagnostics.Process.Start(System.String);start processes through one adapter with ArgumentList, never through the shell
+M:System.Diagnostics.Process.Start(System.String,System.String);start processes through one adapter with ArgumentList, never through the shell

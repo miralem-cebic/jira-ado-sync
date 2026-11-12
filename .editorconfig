@@ -1,0 +1,36 @@
+# Whitespace for every file type, style and analyzer severities for C#. Enforced in the build (EnforceCodeStyleInBuild)
+# and by `dotnet format --verify-no-changes`. Suppress here or with [SuppressMessage(Justification = "...")] only.
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{xml,csproj,props,targets,slnx,json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_using_directive_placement = outside_namespace:warning
+csharp_prefer_braces = true:warning
+dotnet_sort_system_directives_first = true
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+dotnet_style_readonly_field = true:warning
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0055.severity = warning
+dotnet_diagnostic.IDE1006.severity = warning
+
+# Test projects (folders named *.Tests, or below tests/; adjust the glob to your layout, see docs/csharp.md). Tests
+# document themselves through their names, so public test members need no XML comments (CS1591). A test project on
+# Microsoft.Testing.Platform is an executable, and test frameworks need public fixtures, which CA1515 would flag.
+# Keep the braces: a header ending in "*.cs" would satisfy CSH-017 without a real [*.cs] section.
+[{**.Tests/**,tests/**}.cs]
+dotnet_diagnostic.CS1591.severity = none
+dotnet_diagnostic.CA1515.severity = none

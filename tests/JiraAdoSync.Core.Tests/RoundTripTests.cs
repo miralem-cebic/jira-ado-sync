@@ -4,7 +4,6 @@ using JiraAdoSync.Core.Config;
 using JiraAdoSync.Core.Jira;
 using JiraAdoSync.Core.Model;
 using JiraAdoSync.Core.Sync;
-using Xunit;
 
 namespace JiraAdoSync.Core.Tests;
 
@@ -76,7 +75,7 @@ public class RoundTripTests
     """;
 
     [Fact]
-    public void Jira_change_is_written_and_its_echo_from_ado_is_not_written_back()
+    public void JiraChangeIsWrittenAndItsEchoFromAdoIsNotWrittenBack()
     {
         var jira = JiraWebhookParser.Parse(JiraUpdated, "svc-account")!;
         var decision = Assert.IsType<SyncDecision.Apply>(SyncEngine.Decide(jira.Event, null, Mapping));
@@ -97,7 +96,7 @@ public class RoundTripTests
     }
 
     [Fact]
-    public void Ado_echo_with_different_html_wrapping_is_still_no_change()
+    public void AdoEchoWithDifferentHtmlWrappingIsStillNoChange()
     {
         var jira = JiraWebhookParser.Parse(JiraUpdated, "svc-account")!;
         var decision = Assert.IsType<SyncDecision.Apply>(SyncEngine.Decide(jira.Event, null, Mapping));
@@ -112,7 +111,7 @@ public class RoundTripTests
     }
 
     [Fact]
-    public void Ado_echo_with_a_real_change_is_applied()
+    public void AdoEchoWithARealChangeIsApplied()
     {
         var jira = JiraWebhookParser.Parse(JiraUpdated, "svc-account")!;
         var decision = Assert.IsType<SyncDecision.Apply>(SyncEngine.Decide(jira.Event, null, Mapping));
@@ -131,7 +130,7 @@ public class RoundTripTests
     [InlineData("a < b & \"c\"\nline 2")]
     [InlineData("first\n\nthird")]
     [InlineData("ümlauts and emoji 🚀")]
-    public void Html_round_trip_preserves_plain_text(string text)
+    public void HtmlRoundTripPreservesPlainText(string text)
     {
         var html = AdoHtml.FromPlainText(text);
 
@@ -139,7 +138,7 @@ public class RoundTripTests
     }
 
     [Fact]
-    public void Jira_request_body_uses_adf_for_description()
+    public void JiraRequestBodyUsesAdfForDescription()
     {
         var item = new CanonicalItem("Title", "Line one\nLine two", "In Progress", null);
 
@@ -152,7 +151,7 @@ public class RoundTripTests
     }
 
     [Fact]
-    public void Transition_is_found_by_target_status_name()
+    public void TransitionIsFoundByTargetStatusName()
     {
         const string transitions = """
         {

@@ -1,0 +1,14 @@
+<Project>
+  <!-- One version per package for the whole repository (CSH-005). Every package needs an entry in docs/dependencies.md. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="Analyzers">
+    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests">
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.3" />
+  </ItemGroup>
+</Project>

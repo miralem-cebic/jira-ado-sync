@@ -10,6 +10,9 @@ namespace JiraAdoSync.Core.Jira;
 /// </summary>
 public static class AdfText
 {
+    /// <summary>Extracts the text of an ADF document. A plain string (older API versions) is returned as it is.</summary>
+    /// <param name="node">The ADF document node, or a string.</param>
+    /// <returns>The plain text, or null if <paramref name="node"/> is neither an object nor a string.</returns>
     public static string? ToPlainText(JsonElement node)
     {
         if (node.ValueKind == JsonValueKind.String)
@@ -27,11 +30,13 @@ public static class AdfText
         return builder.ToString().TrimEnd('\n');
     }
 
+    /// <summary>Builds an ADF document with one paragraph per line of <paramref name="text"/>.</summary>
+    /// <param name="text">The plain text. Null gives a document with one empty paragraph.</param>
     public static JsonObject FromPlainText(string? text)
     {
         var content = new JsonArray();
 
-        foreach (var line in (text ?? string.Empty).Replace("\r\n", "\n").Split('\n'))
+        foreach (var line in (text ?? string.Empty).Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
         {
             var paragraph = new JsonObject { ["type"] = JsonValue.Create("paragraph") };
 

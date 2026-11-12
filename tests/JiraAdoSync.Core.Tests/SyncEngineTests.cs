@@ -1,7 +1,6 @@
 using JiraAdoSync.Core.Config;
 using JiraAdoSync.Core.Model;
 using JiraAdoSync.Core.Sync;
-using Xunit;
 
 namespace JiraAdoSync.Core.Tests;
 
@@ -42,7 +41,7 @@ public class SyncEngineTests
         new("PROJ-1", "42", apply.Hash, changedAt, Side.Jira);
 
     [Fact]
-    public void Change_made_by_service_identity_is_never_echoed()
+    public void ChangeMadeByServiceIdentityIsNeverEchoed()
     {
         var decision = SyncEngine.Decide(JiraEvent(echo: true), state: null, Mapping());
 
@@ -50,7 +49,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void New_jira_item_is_applied_with_jira_status()
+    public void NewJiraItemIsAppliedWithJiraStatus()
     {
         var decision = SyncEngine.Decide(JiraEvent(), state: null, Mapping());
 
@@ -60,7 +59,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Ado_status_is_translated_to_jira_status()
+    public void AdoStatusIsTranslatedToJiraStatus()
     {
         var decision = SyncEngine.Decide(AdoEvent(state: "Active"), state: null, Mapping());
 
@@ -69,7 +68,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Unmapped_jira_status_is_skipped()
+    public void UnmappedJiraStatusIsSkipped()
     {
         var decision = SyncEngine.Decide(JiraEvent(status: "Blocked"), state: null, Mapping());
 
@@ -77,7 +76,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Unmapped_ado_state_is_skipped()
+    public void UnmappedAdoStateIsSkipped()
     {
         var decision = SyncEngine.Decide(AdoEvent(state: "Removed"), state: null, Mapping());
 
@@ -85,7 +84,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Same_content_as_last_sync_is_not_written_again()
+    public void SameContentAsLastSyncIsNotWrittenAgain()
     {
         var first = Assert.IsType<SyncDecision.Apply>(
             SyncEngine.Decide(JiraEvent(), state: null, Mapping()));
@@ -99,7 +98,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Round_trip_from_ado_with_same_content_is_no_change()
+    public void RoundTripFromAdoWithSameContentIsNoChange()
     {
         // Jira change is applied to ADO. The ADO side then reports the same content back.
         var fromJira = Assert.IsType<SyncDecision.Apply>(
@@ -114,7 +113,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Stale_event_is_skipped_under_last_write_wins()
+    public void StaleEventIsSkippedUnderLastWriteWins()
     {
         var state = new SyncState("PROJ-1", "42", "other-hash", T0.AddHours(1), Side.Ado);
 
@@ -124,7 +123,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Newer_event_is_applied_over_existing_state()
+    public void NewerEventIsAppliedOverExistingState()
     {
         var state = new SyncState("PROJ-1", "42", "other-hash", T0, Side.Ado);
 
@@ -138,7 +137,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Disabled_title_feature_ignores_title_changes()
+    public void DisabledTitleFeatureIgnoresTitleChanges()
     {
         var mapping = Mapping(new FeatureFlags(Title: false));
         var first = Assert.IsType<SyncDecision.Apply>(
@@ -153,7 +152,7 @@ public class SyncEngineTests
     }
 
     [Fact]
-    public void Mapping_with_two_jira_statuses_on_one_ado_state_is_invalid()
+    public void MappingWithTwoJiraStatusesOnOneAdoStateIsInvalid()
     {
         var mapping = new ProjectMapping
         {
@@ -171,11 +170,11 @@ public class SyncEngineTests
         var errors = mapping.Validate();
 
         Assert.Single(errors);
-        Assert.Contains("one-to-one", errors[0]);
+        Assert.Contains("one-to-one", errors[0], StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Valid_mapping_has_no_errors()
+    public void ValidMappingHasNoErrors()
     {
         Assert.Empty(Mapping().Validate());
     }

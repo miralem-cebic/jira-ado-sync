@@ -12,8 +12,15 @@ public static class AdoPatchBuilder
     /// The leading "test" on /rev makes the request fail if the item changed after the revision we read,
     /// so the caller can re-read and retry instead of overwriting a newer change.
     /// </summary>
+    /// <param name="expectedRev">The revision the item had when it was read.</param>
+    /// <param name="item">The field values to write. Null fields are left unchanged.</param>
+    /// <param name="mapping">The mapping that translates the Jira status into the ADO state.</param>
+    /// <exception cref="InvalidOperationException">The Jira status of <paramref name="item"/> has no mapped ADO state.</exception>
     public static string Build(int expectedRev, CanonicalItem item, ProjectMapping mapping)
     {
+        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(mapping);
+
         var operations = new JsonArray
         {
             Operation("test", "/rev", JsonValue.Create(expectedRev)),
