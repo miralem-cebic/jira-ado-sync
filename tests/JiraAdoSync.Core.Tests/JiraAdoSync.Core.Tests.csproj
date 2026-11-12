@@ -18,4 +18,9 @@
     <ProjectReference Include="../../src/JiraAdoSync.Core/JiraAdoSync.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Test the shipped example so it cannot drift from the loader. -->
+    <None Include="../../config/config.example.json" Link="config.example.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

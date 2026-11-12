@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/miralem-cebic/jira-ado-sync/blob/main/config/config.schema.json",
+  "title": "jira-ado-sync configuration",
+  "description": "Non-secret settings. Secrets are referenced by name and never stored in this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["jira", "azureDevOps", "conflictPolicy", "projectMappings"],
+  "properties": {
+    "$schema": { "type": "string" },
+
+    "jira": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siteUrl", "authMode", "apiTokenSetting"],
+      "properties": {
+        "siteUrl": {
+          "type": "string",
+          "pattern": "^https://",
+          "description": "Base URL of the Jira Cloud site, e.g. https://example.atlassian.net"
+        },
+        "authMode": {
+          "enum": ["apiToken"],
+          "description": "apiToken: API token of a dedicated service account."
+        },
+        "apiTokenSetting": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the app setting or environment variable that holds the API token."
+        }
+      }
+    },
+
+    "azureDevOps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["organization", "authMode"],
+      "properties": {
+        "organization": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Azure DevOps organization name, not the full URL."
+        },
+        "authMode": {
+          "enum": ["managedIdentity", "pat"],
+          "description": "managedIdentity is recommended. pat is for local testing only."
+        },
+        "patSetting": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the app setting that holds the PAT. Required when authMode is pat."
+        }
+      },
+      "if": {
+        "properties": { "authMode": { "const": "pat" } },
+        "required": ["authMode"]
+      },
+      "then": {
+        "required": ["patSetting"]
+      }
+    },
+
+    "conflictPolicy": {
+      "enum": ["lastWriteWins"],
+      "description": "lastWriteWins: the newer change wins."
+    },
+
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Which fields are synced. Missing fields default to true.",
+      "properties": {
+        "title": { "type": "boolean" },
+        "description": { "type": "boolean" },
+        "status": { "type": "boolean" },
+        "assignee": { "type": "boolean" }
+      }
+    },
+
+    "projectMappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["jiraProject", "adoProject", "areaPath", "statusMap"],
+        "properties": {
+          "jiraProject": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Jira project key, e.g. PROJ. Must be unique across mappings."
+          },
+          "adoProject": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Azure DevOps project name."
+          },
+          "areaPath": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Area path for work items created from Jira, e.g. MyProject\\Team A."
+          },
+          "statusMap": {
+            "type": "object",
+            "minProperties": 1,
+            "description": "Jira status name to ADO state name. Must be one-to-one.",
+            "additionalProperties": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}
