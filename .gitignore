@@ -10,6 +10,8 @@ local.settings.json
 appsettings.Development.json
 *.secrets.json
 .env
+.env.*
+!.env.example
 
 # OS and editor files
 .DS_Store

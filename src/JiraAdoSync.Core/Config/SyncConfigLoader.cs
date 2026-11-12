@@ -3,8 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace JiraAdoSync.Core.Config;
 
+/// <summary>Outcome of <see cref="SyncConfigLoader.Parse"/>: either a valid configuration or every error found.</summary>
+/// <param name="Config">The validated configuration, or null if any error was found.</param>
+/// <param name="Errors">All problems found, each prefixed with the JSON path it refers to. Empty when valid.</param>
 public sealed record ConfigLoadResult(SyncConfig? Config, IReadOnlyList<string> Errors)
 {
+    /// <summary>True if <see cref="Config"/> is set and no error was found.</summary>
     public bool IsValid => Config is not null && Errors.Count == 0;
 }
 
@@ -13,36 +17,30 @@ public sealed record ConfigLoadResult(SyncConfig? Config, IReadOnlyList<string> 
 /// Unknown properties are rejected, so typos fail loudly instead of being silently ignored.
 /// Errors are collected rather than thrown, so the user sees all problems at once.
 /// </summary>
-public static class SyncConfigLoader
+public static partial class SyncConfigLoader
 {
-    private static readonly string[] JiraAuthModes = { "apiToken" };
-    private static readonly string[] AdoAuthModes = { "managedIdentity", "pat" };
-    private static readonly string[] ConflictPolicies = { "lastWriteWins" };
+    private static readonly string[] JiraAuthModes = ["apiToken"];
+    private static readonly string[] AdoAuthModes = ["managedIdentity", "pat"];
+    private static readonly string[] ConflictPolicies = ["lastWriteWins"];
+    private static readonly string[] EmptyConfiguration = ["Configuration is empty."];
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        // DTO properties are PascalCase in C#; the JSON file uses camelCase, as in the schema.
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = false,
-    };
-
+    /// <summary>Parses <paramref name="json"/> and validates it. Never throws for malformed input.</summary>
+    /// <param name="json">Content of the configuration file.</param>
     public static ConfigLoadResult Parse(string json)
     {
         ConfigFile? file;
         try
         {
-            file = JsonSerializer.Deserialize<ConfigFile>(json, JsonOptions);
+            file = JsonSerializer.Deserialize(json, ConfigJsonContext.Default.ConfigFile);
         }
         catch (JsonException ex)
         {
-            return new ConfigLoadResult(null, new[] { $"Invalid configuration JSON: {ex.Message}" });
+            return new ConfigLoadResult(null, [$"Invalid configuration JSON: {ex.Message}"]);
         }
 
         if (file is null)
         {
-            return new ConfigLoadResult(null, new[] { "Configuration is empty." });
+            return new ConfigLoadResult(null, EmptyConfiguration);
         }
 
         var errors = new List<string>();
@@ -90,7 +88,7 @@ public static class SyncConfigLoader
             valid = false;
         }
 
-        return valid ? new JiraSettings(jira.SiteUrl!, jira.AuthMode!, jira.ApiTokenSetting!) : null;
+        return valid ? new JiraSettings(uri!, jira.AuthMode!, jira.ApiTokenSetting!) : null;
     }
 
     private static AzureDevOpsSettings? ValidateAzureDevOps(AzureDevOpsFile? ado, List<string> errors)
@@ -147,7 +145,7 @@ public static class SyncConfigLoader
             Assignee: features?.Assignee ?? true);
     }
 
-    private static IReadOnlyList<ProjectMapping>? ValidateMappings(
+    private static List<ProjectMapping>? ValidateMappings(
         List<ProjectMappingFile>? files,
         FeatureFlags features,
         List<string> errors)
@@ -221,8 +219,18 @@ public static class SyncConfigLoader
         value is not null && allowed.Any(a => string.Equals(a, value, StringComparison.Ordinal));
 
     // DTOs: mirror the JSON file. Properties are nullable so missing values produce clear errors.
+    // They are private: only the loader sees the raw file shape; callers get the validated SyncConfig.
 
-    public sealed class ConfigFile
+    // DTO properties are PascalCase in C#; the JSON file uses camelCase, as in the schema.
+    [JsonSourceGenerationOptions(
+        PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+        UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = false)]
+    [JsonSerializable(typeof(ConfigFile))]
+    private sealed partial class ConfigJsonContext : JsonSerializerContext;
+
+    private sealed class ConfigFile
     {
         [JsonPropertyName("$schema")]
         public string? Schema { get; set; }
@@ -238,7 +246,7 @@ public static class SyncConfigLoader
         public List<ProjectMappingFile>? ProjectMappings { get; set; }
     }
 
-    public sealed class JiraFile
+    private sealed class JiraFile
     {
         public string? SiteUrl { get; set; }
 
@@ -247,7 +255,7 @@ public static class SyncConfigLoader
         public string? ApiTokenSetting { get; set; }
     }
 
-    public sealed class AzureDevOpsFile
+    private sealed class AzureDevOpsFile
     {
         public string? Organization { get; set; }
 
@@ -256,7 +264,7 @@ public static class SyncConfigLoader
         public string? PatSetting { get; set; }
     }
 
-    public sealed class FeaturesFile
+    private sealed class FeaturesFile
     {
         public bool? Title { get; set; }
 
@@ -267,7 +275,7 @@ public static class SyncConfigLoader
         public bool? Assignee { get; set; }
     }
 
-    public sealed class ProjectMappingFile
+    private sealed class ProjectMappingFile
     {
         public string? JiraProject { get; set; }
 

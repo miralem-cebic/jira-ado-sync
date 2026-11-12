@@ -1,0 +1,82 @@
+name: Bug report
+description: Report a reproducible problem with the sync
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please search [existing issues](https://github.com/miralem-cebic/jira-ado-sync/issues) first.
+        For security vulnerabilities, do **not** use this form. See [SECURITY.md](https://github.com/miralem-cebic/jira-ado-sync/blob/main/SECURITY.md).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Direction
+      options:
+        - Jira to Azure DevOps
+        - Azure DevOps to Jira
+        - Both
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps that reliably trigger the bug.
+      placeholder: |
+        1. Change the status of a Jira issue to ...
+        2. Wait for the webhook
+        3. See ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release version or commit SHA you are using.
+      placeholder: e.g. v0.1.0 or 3f2a9c1
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration excerpt
+      description: The relevant part of your configuration file (project mapping, status map, features). It never contains secrets, but remove internal names you do not want to share.
+      render: json
+
+  - type: textarea
+    id: payload
+    attributes:
+      label: Webhook payload or logs
+      description: A webhook body or log output helps a lot. Remove tokens, email addresses, account IDs and confidential work item content first.
+      render: shell
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct.
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

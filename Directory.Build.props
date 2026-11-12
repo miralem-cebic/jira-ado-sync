@@ -1,0 +1,45 @@
+<Project>
+  <!--
+    engineering-baseline, C# build rules (CSH-001..CSH-018). Applies to every project below this folder.
+    Never weaken a setting to make a build pass; fix the code, or record a justified exception.
+    Suppress only in .editorconfig or with [SuppressMessage(Justification = "...")], never with a blanket NoWarn.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Deterministic>true</Deterministic>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile> <!-- IDE0005 (unused usings) is only reported with it -->
+
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile> <!-- versions: Directory.Packages.props -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode> <!-- transitive packages too -->
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
+
+  <!-- Test projects (*.Tests): xUnit v3 on Microsoft.Testing.Platform (docs/csharp.md in engineering-baseline). -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <OutputType>Exe</OutputType> <!-- xUnit v3 refuses to build without it -->
+    <IsPackable>false</IsPackable>
+    <!-- xUnit's generated synchronous Main blocks on a task (RS0030); this symbol silences that file only. -->
+    <DefineConstants>$(DefineConstants);XUNIT_GENERATED_DISABLE_WARNINGS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <PackageReference Include="xunit.v3.mtp-v2" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

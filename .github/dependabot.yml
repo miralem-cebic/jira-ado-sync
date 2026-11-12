@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    # Default titles are "Bump x from a to b", which fails the Conventional Commit title check.
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      nuget:
+        patterns: ['*']
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
+      include: scope
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+      include: scope
+    ignore:
+      # The conformance workflow is pinned to a main commit until engineering-baseline releases the C# rules
+      # (see ci.yml). Lift this once ci.yml points at a release commit, so Dependabot moves rules and workflow together.
+      - dependency-name: miralem-cebic/engineering-baseline

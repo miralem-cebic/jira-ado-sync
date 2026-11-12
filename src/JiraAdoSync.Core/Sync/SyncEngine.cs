@@ -9,8 +9,15 @@ namespace JiraAdoSync.Core.Sync;
 /// </summary>
 public static class SyncEngine
 {
+    /// <summary>Decides whether <paramref name="evt"/> leads to a write on the other side.</summary>
+    /// <param name="evt">The incoming change, in the source side's vocabulary.</param>
+    /// <param name="state">Stored state of the linked pair, or null if the item has not been synced yet.</param>
+    /// <param name="mapping">The project mapping the item belongs to.</param>
     public static SyncDecision Decide(SyncEvent evt, SyncState? state, ProjectMapping mapping)
     {
+        ArgumentNullException.ThrowIfNull(evt);
+        ArgumentNullException.ThrowIfNull(mapping);
+
         // 1. Echo suppression: our own writes must not trigger another write.
         if (evt.ChangedByServiceIdentity)
         {

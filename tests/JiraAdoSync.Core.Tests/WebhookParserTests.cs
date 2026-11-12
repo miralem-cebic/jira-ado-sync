@@ -1,7 +1,6 @@
 using JiraAdoSync.Core.Ado;
 using JiraAdoSync.Core.Jira;
 using JiraAdoSync.Core.Model;
-using Xunit;
 
 namespace JiraAdoSync.Core.Tests;
 
@@ -58,7 +57,7 @@ public class WebhookParserTests
     """;
 
     [Fact]
-    public void Jira_issue_updated_is_parsed_into_a_sync_event()
+    public void JiraIssueUpdatedIsParsedIntoASyncEvent()
     {
         var change = JiraWebhookParser.Parse(JiraUpdated, serviceAccountId: "svc-account");
 
@@ -74,7 +73,7 @@ public class WebhookParserTests
     }
 
     [Fact]
-    public void Jira_change_by_service_account_is_flagged_as_echo()
+    public void JiraChangeByServiceAccountIsFlaggedAsEcho()
     {
         var change = JiraWebhookParser.Parse(JiraUpdated, serviceAccountId: "acc-123");
 
@@ -82,15 +81,15 @@ public class WebhookParserTests
     }
 
     [Fact]
-    public void Unsupported_jira_event_returns_null()
+    public void UnsupportedJiraEventReturnsNull()
     {
-        var json = JiraUpdated.Replace("jira:issue_updated", "jira:issue_deleted");
+        var json = JiraUpdated.Replace("jira:issue_updated", "jira:issue_deleted", StringComparison.Ordinal);
 
         Assert.Null(JiraWebhookParser.Parse(json, "svc-account"));
     }
 
     [Fact]
-    public void Ado_update_takes_changed_field_values_over_the_full_state()
+    public void AdoUpdateTakesChangedFieldValuesOverTheFullState()
     {
         var change = AdoWebhookParser.Parse(AdoUpdated, serviceIdentityUniqueName: "svc-ado");
 
@@ -105,9 +104,9 @@ public class WebhookParserTests
     }
 
     [Fact]
-    public void Ado_change_by_service_identity_is_flagged_as_echo()
+    public void AdoChangeByServiceIdentityIsFlaggedAsEcho()
     {
-        var json = AdoUpdated.Replace("someone@example.com", "svc-ado");
+        var json = AdoUpdated.Replace("someone@example.com", "svc-ado", StringComparison.Ordinal);
 
         var change = AdoWebhookParser.Parse(json, serviceIdentityUniqueName: "svc-ado");
 
@@ -115,15 +114,15 @@ public class WebhookParserTests
     }
 
     [Fact]
-    public void Unsupported_ado_event_returns_null()
+    public void UnsupportedAdoEventReturnsNull()
     {
-        var json = AdoUpdated.Replace("workitem.updated", "workitem.deleted");
+        var json = AdoUpdated.Replace("workitem.updated", "workitem.deleted", StringComparison.Ordinal);
 
         Assert.Null(AdoWebhookParser.Parse(json, "svc-ado"));
     }
 
     [Fact]
-    public void Adf_and_html_plain_text_are_converted_consistently()
+    public void AdfAndHtmlPlainTextAreConvertedConsistently()
     {
         var adf = JiraUpdated;
         var jira = JiraWebhookParser.Parse(adf, "svc-account");

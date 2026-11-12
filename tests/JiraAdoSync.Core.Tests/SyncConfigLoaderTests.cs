@@ -1,5 +1,4 @@
 using JiraAdoSync.Core.Config;
-using Xunit;
 
 namespace JiraAdoSync.Core.Tests;
 
@@ -31,7 +30,7 @@ public class SyncConfigLoaderTests
     """;
 
     [Fact]
-    public void Shipped_example_configuration_is_valid()
+    public void ShippedExampleConfigurationIsValid()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "config.example.json");
 
@@ -41,13 +40,13 @@ public class SyncConfigLoaderTests
     }
 
     [Fact]
-    public void Valid_configuration_is_loaded()
+    public void ValidConfigurationIsLoaded()
     {
         var result = SyncConfigLoader.Parse(ValidJson);
 
         Assert.True(result.IsValid, string.Join("; ", result.Errors));
         var config = Assert.IsType<SyncConfig>(result.Config);
-        Assert.Equal("https://example.atlassian.net", config.Jira.SiteUrl);
+        Assert.Equal(new Uri("https://example.atlassian.net"), config.Jira.SiteUrl);
         Assert.Equal("JIRA_API_TOKEN", config.Jira.ApiTokenSetting);
         Assert.Equal("example-org", config.AzureDevOps.Organization);
         Assert.Null(config.AzureDevOps.PatSetting);
@@ -57,7 +56,7 @@ public class SyncConfigLoaderTests
     }
 
     [Fact]
-    public void Missing_feature_flags_default_to_true_and_explicit_false_is_kept()
+    public void MissingFeatureFlagsDefaultToTrueAndExplicitFalseIsKept()
     {
         var config = Assert.IsType<SyncConfig>(SyncConfigLoader.Parse(ValidJson).Config);
 
@@ -68,40 +67,40 @@ public class SyncConfigLoaderTests
     }
 
     [Fact]
-    public void Unknown_property_is_rejected_so_typos_do_not_pass_silently()
+    public void UnknownPropertyIsRejectedSoTyposDoNotPassSilently()
     {
-        var json = ValidJson.Replace("\"conflictPolicy\"", "\"conflictPolicyy\"");
+        var json = ValidJson.Replace("\"conflictPolicy\"", "\"conflictPolicyy\"", StringComparison.Ordinal);
 
         var result = SyncConfigLoader.Parse(json);
 
         Assert.False(result.IsValid);
-        Assert.Contains("Invalid configuration JSON", result.Errors[0]);
+        Assert.Contains("Invalid configuration JSON", result.Errors[0], StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Non_https_site_url_is_rejected()
+    public void NonHttpsSiteUrlIsRejected()
     {
-        var json = ValidJson.Replace("https://example.atlassian.net", "http://example.atlassian.net");
+        var json = ValidJson.Replace("https://example.atlassian.net", "http://example.atlassian.net", StringComparison.Ordinal);
 
         var result = SyncConfigLoader.Parse(json);
 
         Assert.False(result.IsValid);
-        Assert.Contains("jira.siteUrl", result.Errors[0]);
+        Assert.Contains("jira.siteUrl", result.Errors[0], StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Pat_auth_requires_pat_setting()
+    public void PatAuthRequiresPatSetting()
     {
-        var json = ValidJson.Replace("\"managedIdentity\"", "\"pat\"");
+        var json = ValidJson.Replace("\"managedIdentity\"", "\"pat\"", StringComparison.Ordinal);
 
         var result = SyncConfigLoader.Parse(json);
 
         Assert.False(result.IsValid);
-        Assert.Contains("azureDevOps.patSetting", result.Errors[0]);
+        Assert.Contains("azureDevOps.patSetting", result.Errors[0], StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Duplicate_jira_project_is_rejected()
+    public void DuplicateJiraProjectIsRejected()
     {
         var mapping = """
         {
@@ -113,40 +112,42 @@ public class SyncConfigLoaderTests
         """;
         var json = ValidJson.Replace(
             "\"projectMappings\": [",
-            "\"projectMappings\": [" + mapping + ",");
+            "\"projectMappings\": [" + mapping + ",",
+            StringComparison.Ordinal);
 
         var result = SyncConfigLoader.Parse(json);
 
         Assert.False(result.IsValid);
-        Assert.Contains("mapped more than once", string.Join(" ", result.Errors));
+        Assert.Contains("mapped more than once", string.Join(" ", result.Errors), StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Non_one_to_one_status_map_is_reported_through_the_loader()
+    public void NonOneToOneStatusMapIsReportedThroughTheLoader()
     {
         var json = ValidJson.Replace(
             "\"Done\": \"Closed\"",
-            "\"Done\": \"Active\"");
+            "\"Done\": \"Active\"",
+            StringComparison.Ordinal);
 
         var result = SyncConfigLoader.Parse(json);
 
         Assert.False(result.IsValid);
-        Assert.Contains("one-to-one", string.Join(" ", result.Errors));
+        Assert.Contains("one-to-one", string.Join(" ", result.Errors), StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Unsupported_conflict_policy_is_rejected()
+    public void UnsupportedConflictPolicyIsRejected()
     {
-        var json = ValidJson.Replace("\"lastWriteWins\"", "\"sourceOfTruthPerField\"");
+        var json = ValidJson.Replace("\"lastWriteWins\"", "\"sourceOfTruthPerField\"", StringComparison.Ordinal);
 
         var result = SyncConfigLoader.Parse(json);
 
         Assert.False(result.IsValid);
-        Assert.Contains("conflictPolicy", result.Errors[0]);
+        Assert.Contains("conflictPolicy", result.Errors[0], StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Empty_project_mappings_are_rejected()
+    public void EmptyProjectMappingsAreRejected()
     {
         var json = """
         {
@@ -160,6 +161,6 @@ public class SyncConfigLoaderTests
         var result = SyncConfigLoader.Parse(json);
 
         Assert.False(result.IsValid);
-        Assert.Contains("at least one mapping", result.Errors[0]);
+        Assert.Contains("at least one mapping", result.Errors[0], StringComparison.Ordinal);
     }
 }
