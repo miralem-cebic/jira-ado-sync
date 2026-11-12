@@ -1,28 +1,8 @@
 {
-  "baseline": "0.1.1",
+  "baseline": "0.2.0",
   "ecosystems": ["csharp"],
   "topology": "hosted-db",
+  "surface": "api",
   "repo": "miralem-cebic/jira-ado-sync",
-  "waivers": [
-    {
-      "rule": "HOS-001",
-      "reason": "Webhook API on Azure Functions without browser content or a static-host header file (the check reads netlify.toml, _headers, vercel.json, staticwebapp.config.json). The Functions host sets the API security headers in code when it is added; the rule needs a variant for API hosts upstream.",
-      "expires": "2027-05-31"
-    },
-    {
-      "rule": "HOS-002",
-      "reason": "Same as HOS-001: no static-host header file. Azure Functions enforces HTTPS (httpsOnly); HSTS is set in code with the host.",
-      "expires": "2027-05-31"
-    },
-    {
-      "rule": "HOS-003",
-      "reason": "Same as HOS-001: no static-host header file. nosniff and frame-ancestors 'none' are set in code with the host.",
-      "expires": "2027-05-31"
-    },
-    {
-      "rule": "HOS-006",
-      "reason": "A webhook API serves no static or hashed assets, so there is nothing to cache immutably.",
-      "expires": "2027-05-31"
-    }
-  ]
+  "waivers": []
 }

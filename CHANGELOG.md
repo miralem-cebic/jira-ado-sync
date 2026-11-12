@@ -33,6 +33,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- engineering-baseline v0.2.0: the `conformance` job is pinned to the release commit, and Dependabot moves the pin.
+  `baseline.json` declares `"surface": "api"`, which replaces the four HOS waivers with the API header rules
+  `HOS-009..012` (proposed; open until the Functions host sets the headers).
 - .NET 10 instead of .NET 8, xUnit v3 on Microsoft.Testing.Platform instead of xUnit v2 (ADR 0002).
 - `JiraSettings.SiteUrl` is a `Uri`.
 - Configuration DTOs are private and read with a source-generated `JsonSerializerContext`.

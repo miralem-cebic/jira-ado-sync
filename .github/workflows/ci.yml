@@ -50,8 +50,8 @@ jobs:
           fi
 
   conformance:
-    # Pinned to a commit of engineering-baseline main after v0.1.1: the C# rules CSH-007..018 and the GEN-014 fix for
-    # NuGet lock files are not in a release yet. Move to the commit of the first release that has them (SEC-004).
-    uses: miralem-cebic/engineering-baseline/.github/workflows/conformance.yml@6b2a89283d2ce9e1e0b135a4e1916864553f2e9d # main
+    # Commit of a release, tag in a comment (SEC-004). The checker runs from the same commit, so this line pins the
+    # rules too; Dependabot moves it. Change "baseline" in baseline.json in the same pull request.
+    uses: miralem-cebic/engineering-baseline/.github/workflows/conformance.yml@a7e3acb3d2adb28d6a42d9c335bd35f2916d0e2c # v0.2.0
     with:
       strict: true

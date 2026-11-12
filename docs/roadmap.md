@@ -25,7 +25,7 @@ Legend: `[ ]` open · `[~]` in progress · `[x]` done · `[!]` blocked
 | 0.x | Phase 3: creating items, assignee, comments, links, iterations |
 | 1.0 | Phase 4 (conflict policies), plus everything above running against real projects without manual repair |
 
-## Phase 0: foundation
+## Phase 0: foundation (done)
 
 - [x] Design document, MIT licence, example configuration
 - [x] Pure sync engine: echo suppression for the sync's own identity, hash check over the synced field set, status
@@ -38,14 +38,13 @@ Legend: `[ ]` open · `[~]` in progress · `[x]` done · `[!]` blocked
   a different HTML line break form
 - [x] engineering-baseline adopted: C# build rules on .NET 10, pipeline, project files
   ([#1](https://github.com/miralem-cebic/jira-ado-sync/pull/1)); CI and Dependabot green
-- [ ] Apply the repository settings: `scripts/apply-repo-settings.sh miralem-cebic/jira-ado-sync "verify,pr-title,conformance / check"`.
-  Squash-only is not active yet (#1 was merged with a merge commit)
-- [ ] Enable private vulnerability reporting; `SECURITY.md` points to it
-- [ ] Check `config.example.json` against `config.schema.json` in a test, so the schema (for editors) and the loader
-  (authoritative) cannot drift. .NET has no JSON Schema validator: needs a decision on a package
-  (`docs/dependencies.md`) or another way
-- [ ] Move the conformance pin in `ci.yml` to the first engineering-baseline release with the C# rules, and lift the
-  Dependabot ignore for it
+- [x] Repository settings applied with `scripts/apply-repo-settings.sh`: `main` is protected, pull requests are
+  squash-merged and their branches deleted on merge (seen on
+  [#2](https://github.com/miralem-cebic/jira-ado-sync/pull/2))
+- [x] Private vulnerability reporting is enabled; `SECURITY.md` points to it
+
+Moved out of this phase, because they are not foundation work: the schema check (Phase 1) and the conformance pin
+(Maintenance, done with engineering-baseline v0.2.0).
 
 ## Phase 1: walking skeleton
 
@@ -56,6 +55,9 @@ not written back.
   long each source waits for a response and how it retries
 - [ ] Interfaces in the core for the Jira client, the ADO client and the state store; `TimeProvider` where a clock is
   needed
+- [ ] Check `config.example.json` against `config.schema.json` in a test, so the schema (for editors) and the loader
+  (authoritative) cannot drift once this phase adds settings (webhook secrets, the sync's own Jira account and ADO
+  identity). .NET has no JSON Schema validator: needs a decision on a package (`docs/dependencies.md`) or another way
 - [ ] Jira REST client (API v3): read issue, update summary and description, list transitions and transition; API
   token of a dedicated service account
 - [ ] ADO REST client (7.1): read work item, JSON Patch with the `/rev` test; managed identity, PAT for local testing
@@ -69,8 +71,9 @@ not written back.
 - [ ] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook
 - [ ] Webhook authentication: requests without a valid secret are rejected (shared secret or HMAC, per source;
   DESIGN.md section 9)
-- [ ] Security headers on every response (`X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src
-  'none'; frame-ancestors 'none'`, HSTS). Then remove the HOS waivers from `baseline.json` (they expire 2027-05-31)
+- [ ] Security headers on every response: `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
+  `X-Content-Type-Options: nosniff`, `Cache-Control: no-store` and HSTS. The baseline rules `HOS-009..012`
+  (proposed, surface `api`) then pass
 - [ ] `CA2007` decided for the host project, with the reason next to the setting (ADR 0002)
 - [ ] One log line per event: source, item, the engine's decision (`SkipReason` or apply). No tokens, no field contents
 - [ ] New packages (Functions worker, `Azure.Data.Tables`, `Azure.Identity`) in `docs/dependencies.md`, each used only
@@ -114,6 +117,15 @@ DESIGN.md section 7. v1 is `lastWriteWins`.
 - [ ] `sourceOfTruthPerField`: each field is owned by one side, for example status by ADO and description by Jira
 - [ ] `flagForReview`: when both sides changed since the last sync, comment on both items and skip the write
 
+## Maintenance
+
+Ongoing work outside the phases.
+
+- [x] Conformance pinned to the engineering-baseline release v0.2.0, which has the C# rules and `GEN-014` for NuGet
+  lock files; Dependabot moves the pin from now on
+- [x] HOS waivers removed: `baseline.json` declares `"surface": "api"` (engineering-baseline ADR 7), so the
+  static-host header rules no longer apply. The API header rules `HOS-009..012` take their place (Phase 1)
+
 ## Later
 
 | Could | Note |
@@ -137,7 +149,7 @@ DESIGN.md section 7. v1 is `lastWriteWins`.
 | Inline processing or a queue | Phase 1 | DESIGN.md, section 3 |
 | Retry strategy and limits | Phase 1 | DESIGN.md, section 11 |
 | Webhook authentication per source | Phase 1 | DESIGN.md, section 9 |
-| JSON Schema check in tests: which package, if any | Phase 0 | Loader and schema can drift |
+| JSON Schema check in tests: which package, if any | Phase 1 | Loader and schema can drift |
 | Sandbox systems: Jira site, ADO organization and projects | Phase 2 | Needed for tests against real systems |
 | Jira webhook per project or global | Phase 2 | DESIGN.md, section 11 |
 | Iteration mapping by name or by table | Phase 3 | DESIGN.md, section 11 |
