@@ -1,0 +1,17 @@
+# .NET build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Local settings and secrets: never commit these
+local.settings.json
+appsettings.Development.json
+*.secrets.json
+.env
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/

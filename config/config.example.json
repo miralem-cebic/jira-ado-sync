@@ -1,0 +1,45 @@
+{
+  "_comment": "Example configuration. Copy to config.json and adjust. Secrets are NOT stored here; see docs/DESIGN.md#secrets.",
+
+  "jira": {
+    "siteUrl": "https://your-site.atlassian.net",
+    "authMode": "apiToken",
+    "_authModes": "apiToken (service account) | oauth2 (3LO, planned)"
+  },
+
+  "azureDevOps": {
+    "organization": "your-org",
+    "authMode": "managedIdentity",
+    "_authModes": "managedIdentity (recommended) | pat (for local testing only)"
+  },
+
+  "conflictPolicy": "lastWriteWins",
+  "_conflictPolicies": "lastWriteWins | sourceOfTruthPerField (planned) | flagForReview (planned)",
+
+  "features": {
+    "title": true,
+    "description": true,
+    "status": true,
+    "assignee": true,
+    "comments": true,
+    "links": true,
+    "iterations": true
+  },
+
+  "projectMappings": [
+    {
+      "jiraProject": "PROJ",
+      "adoProject": "your-ado-project",
+      "areaPath": "your-ado-project\\Team A",
+      "statusMap": {
+        "To Do": "New",
+        "In Progress": "Active",
+        "Done": "Closed"
+      },
+      "linkTypeMap": {
+        "Parent": "Parent",
+        "Relates": "Related"
+      }
+    }
+  ]
+}
