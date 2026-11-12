@@ -1,19 +1,57 @@
 name: CI
 
 on:
+  pull_request:
   push:
     branches: [main]
-  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
-          dotnet-version: '8.0.x'
+          global-json-file: global.json
+      - run: shellcheck scripts/*.sh
+      # Locked restore, build (warnings are errors), tests, dotnet format --verify-no-changes.
+      - run: scripts/verify.sh
+      # NuGetAudit already fails the restore on a known vulnerability (CSH-013). This lists every vulnerable
+      # package by name, transitive ones included, so the report says what to update.
+      - name: Vulnerable packages
+        run: |
+          report="$(dotnet package list --project JiraAdoSync.slnx --vulnerable --include-transitive --format json)"
+          if ! printf '%s' "$report" | jq -e '[.projects[].frameworks[]? | (.topLevelPackages[]?, .transitivePackages[]?)] | length == 0' >/dev/null; then
+            printf '%s\n' "$report"
+            echo "::error::Vulnerable packages found. Update them in Directory.Packages.props."
+            exit 1
+          fi
 
-      - name: Test
-        run: dotnet test tests/JiraAdoSync.Core.Tests/JiraAdoSync.Core.Tests.csproj --configuration Release
+  pr-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      # Native shell check instead of a third-party action: Conventional Commits, squash-merge friendly.
+      - name: Check Conventional Commit title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: .+'
+          if ! printf '%s' "$TITLE" | grep -Eq "$pattern"; then
+            echo "PR title must be a Conventional Commit, e.g. 'feat(jira): sync comments'. Got: $TITLE"
+            exit 1
+          fi
+
+  conformance:
+    # Pinned to a commit of engineering-baseline main after v0.1.1: the C# rules CSH-007..018 and the GEN-014 fix for
+    # NuGet lock files are not in a release yet. Move to the commit of the first release that has them (SEC-004).
+    uses: miralem-cebic/engineering-baseline/.github/workflows/conformance.yml@6b2a89283d2ce9e1e0b135a4e1916864553f2e9d # main
+    with:
+      strict: true
