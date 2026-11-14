@@ -57,9 +57,10 @@ not written back.
 - [x] Interfaces in the core: `IJiraClient`, `IAdoClient` and `ISyncStateStore` (save with ETag), used by
   `SyncProcessor`, which is tested against fakes. The processor needs no clock, so `TimeProvider` comes in with the host
   that needs one
-- [ ] Check `config.example.json` against `config.schema.json` in a test, so the schema (for editors) and the loader
-  (authoritative) cannot drift once this phase adds settings (webhook secrets, the sync's own Jira account and ADO
-  identity). .NET has no JSON Schema validator: needs a decision on a package (`docs/dependencies.md`) or another way
+- [x] Schema test: `ConfigSchemaTests` checks that the example, the schema and the loader agree on 14 cases, with
+  NJsonSchema as a test-only dependency (`docs/dependencies.md`). It found three gaps: the loader accepted an empty ADO
+  state, and the schema accepted whitespace and an `https://` URL without a host. Both sides now agree. Webhook settings
+  get their own cases when they are added
 - [~] Jira REST client (API v3) in `JiraAdoSync.Adapters`: read the issue status, update summary and description, list
   transitions and transition. The host sets the service account's API token on the `HttpClient`. Recorded responses come
   in Phase 2
@@ -156,7 +157,7 @@ Ongoing work outside the phases.
 | Inline processing or a queue: decided, [ADR 0004](adr/0004-acknowledge-and-enqueue-deliveries.md) | Phase 1 | DESIGN.md, section 3 |
 | Retry strategy and limits | Phase 1 | DESIGN.md, section 11 |
 | Webhook authentication per source | Phase 1 | DESIGN.md, section 9 |
-| JSON Schema check in tests: which package, if any | Phase 1 | Loader and schema can drift |
+| JSON Schema check in tests: NJsonSchema, decided (`docs/dependencies.md`) | Phase 1 | Loader and schema can drift |
 | Sandbox systems: Jira site, ADO organization and projects | Phase 2 | Needed for tests against real systems |
 | Jira webhook per project or global | Phase 2 | DESIGN.md, section 11 |
 | Iteration mapping by name or by table | Phase 3 | DESIGN.md, section 11 |
