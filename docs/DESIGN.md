@@ -95,6 +95,7 @@ Secrets never live in the config file.
 
 - **Jira:** API token of a dedicated service account. Stored as an app setting or in Key Vault.
 - **ADO:** Managed Identity of the Function, granted access to the ADO organization. A PAT is supported for local testing only.
+- **Settings:** the configuration names the settings for the Jira API token and webhook secret, and for the ADO service hook credentials (`jira.apiTokenSetting`, `jira.webhookSecretSetting`, `azureDevOps.webhookUserSetting`, `azureDevOps.webhookPasswordSetting`). The host reads them at startup.
 - **Webhook authentication:** per source. Jira signs deliveries of admin webhooks that have a secret with an HMAC in the
   `X-Hub-Signature` header. ADO sends basic authentication, which must use HTTPS. Requests without a valid credential are
   rejected. The exact checks are in ADR 0006.

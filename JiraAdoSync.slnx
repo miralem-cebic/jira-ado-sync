@@ -3,6 +3,7 @@
     <Project Path="src/JiraAdoSync.Core/JiraAdoSync.Core.csproj" />
     <Project Path="src/JiraAdoSync.Adapters/JiraAdoSync.Adapters.csproj" />
     <Project Path="src/JiraAdoSync.Azure/JiraAdoSync.Azure.csproj" />
+    <Project Path="src/JiraAdoSync.Functions/JiraAdoSync.Functions.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/JiraAdoSync.Core.Tests/JiraAdoSync.Core.Tests.csproj" />
