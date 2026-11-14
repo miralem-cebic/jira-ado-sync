@@ -181,6 +181,15 @@ public static partial class SyncConfigLoader
                 continue;
             }
 
+            foreach (var (jiraStatus, adoState) in file.StatusMap)
+            {
+                if (string.IsNullOrWhiteSpace(adoState))
+                {
+                    errors.Add($"{path}.statusMap.{jiraStatus}: the ADO state must not be empty.");
+                    valid = false;
+                }
+            }
+
             if (!seenJiraProjects.Add(file.JiraProject))
             {
                 errors.Add($"{path}.jiraProject: '{file.JiraProject}' is mapped more than once.");
