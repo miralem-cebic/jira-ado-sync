@@ -49,6 +49,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   documented response shapes.
 - Schema test (`ConfigSchemaTests`): the shipped example, `config/config.schema.json` and the loader must agree on
   14 cases. NJsonSchema is a test-only dependency.
+- Webhook receiver (`WebhookReceiver`) and delivery processor (`DeliveryProcessor`) behind the ports
+  `IRawDeliveryStore` and `IDeliveryDispatcher` (ADR 0004). The receiver authenticates, rejects a body that is not JSON,
+  stores the body under its source and SHA-256, enqueues a message and answers. The processor parses the stored body,
+  maps the project and runs the sync. A redelivery keeps one stored body, and a lost save race is retried.
+- Response codes of the receiver (ADR 0007): 202, 401, 400 and 503. The receiver never answers 500, 429 or 410.
+- Azure storage adapters (`JiraAdoSync.Azure`): the raw deliveries in Blob Storage, the delivery queue on Storage Queue
+  with Base64 encoding, and the pair store on Table Storage with ETag-checked saves. Tested against Azurite.
+- Azure Functions host (`JiraAdoSync.Functions`, ADR 0008): the Jira and ADO webhook endpoints, the queue-triggered
+  processor and the start-up configuration. The host validates the configuration and reads the secrets it names, and
+  stops with a message that names the missing setting but never its value. Every response carries the baseline
+  security headers. Local run: `docs/running-locally.md`.
+- Authorization handlers for the REST clients: basic (Jira API token, ADO PAT) and bearer (ADO managed identity).
+- Log lines per event: source, item, blob name and decision. Bodies and secrets are never logged.
 
 ### Changed
 
@@ -60,3 +73,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Configuration DTOs are private and read with a source-generated `JsonSerializerContext`.
 - Configuration schema aligned with the loader: a `pat` authentication needs `patSetting`, whitespace-only names are
   rejected, and `https://` needs a host. The loader rejects an empty ADO state in a status map.
+- Configuration: `jira.accountEmail`, `jira.serviceAccountId`, `jira.webhookSecretSetting`, `azureDevOps.serviceIdentity`,
+  `azureDevOps.webhookUserSetting` and `azureDevOps.webhookPasswordSetting` are required. They name the sync's own identities
+  and the settings that hold the webhook credentials. A configuration without them no longer loads.

@@ -62,45 +62,50 @@ not written back.
   state, and the schema accepted whitespace and an `https://` URL without a host. Both sides now agree. Webhook settings
   get their own cases when they are added
 - [~] Jira REST client (API v3) in `JiraAdoSync.Adapters`: read the issue status, update summary and description, list
-  transitions and transition. The host sets the service account's API token on the `HttpClient`. Recorded responses come
-  in Phase 2
+  transitions and transition. The host sets the e-mail and the API token with `BasicAuthorizationHandler`, and the retry
+  policy in front. Recorded responses come in Phase 2
 - [~] ADO REST client (7.1) in `JiraAdoSync.Adapters`: read the revision, JSON Patch with the `/rev` test. The host sets
-  managed identity or the PAT on the `HttpClient`
+  the managed identity (`BearerAuthorizationHandler`) or a PAT for local testing
 - [~] Retry strategy: decided in ADR 0005 and implemented in `RetryingHandler`. Open: the status code of a failed `/rev`
   test, which needs a real response. The clients throw on any failure, so the queue reads the item again and decides
   again (ADR 0004)
 - [~] Contract tests for both clients against the documented response shapes (DESIGN.md, section 10). Recorded responses
   replace them in Phase 2
-- [ ] State store on Azure Table Storage: table `SyncItems` as in DESIGN.md section 4. Writes use the entity ETag, so
-  two concurrent events for one pair cannot both win
-- [ ] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook,
-  and a queue trigger for the processor (ADR 0004)
-- [~] Webhook authentication: decided in ADR 0006, and the checks are in `WebhookAuthenticator`, tested. Open: the host
-  rejects requests with `401` before it parses or stores them
-- [ ] Security headers on every response: `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
-  `X-Content-Type-Options: nosniff`, `Cache-Control: no-store` and HSTS. The baseline rules `HOS-009..012`
-  (proposed, surface `api`) then pass
-- [ ] `CA2007` decided for the host project, with the reason next to the setting (ADR 0002)
-- [ ] One log line per event: source, item, the engine's decision (`SkipReason` or apply). No tokens, no field contents
-- [ ] New packages (Functions worker and its storage bindings, `Azure.Data.Tables`, `Azure.Identity`, Blob Storage for
-  the raw deliveries) in `docs/dependencies.md`, each used only outside the core
+- [x] State store on Azure Table Storage (`TableSyncStateStore`): table `SyncItems` as in DESIGN.md section 4. The save
+  uses the entity ETag, so two concurrent events for one pair cannot both win. Tested against Azurite
+- [x] Receiver and processor behind ports (ADR 0004, ADR 0007): `WebhookReceiver` authenticates, checks that the body is
+  JSON, stores it under `source/SHA-256` and enqueues a message that names it. `DeliveryProcessor` loads it, parses it,
+  maps the project and runs the sync. A redelivery keeps one stored body. The Azure adapters for the ports come with the
+  host
+- [x] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook,
+  and a queue trigger for the processor (ADR 0004, ADR 0008). It starts and answers locally against Azurite
+  (`docs/running-locally.md`). Deployment is Phase 2
+- [x] Webhook authentication: decided in ADR 0006, checked before anything is parsed or stored (`WebhookAuthenticator`,
+  `WebhookReceiver`). The host answers `401` and maps every failure to `503`
+- [x] Security headers on every response: `ResponseHeaders` sets the four headers, and a local request shows them (`curl
+  -i`). They match the API rules HOS-009..012
+- [x] `CA2007` decided for the host project: it stays on and every `await` uses `ConfigureAwait(false)` (ADR 0008)
+- [x] One log line when a delivery is answered and one when it is processed. Each carries source, item key, blob name
+  and decision. Bodies, headers and secrets are never logged
+- [x] New packages in `docs/dependencies.md`, with the licence of each (MIT, Apache-2.0 and BSD-3-Clause)
 
 **Acceptance:** the same event delivered twice writes once; an older event never overwrites a newer change; the echo of
-the sync's own write ends as `EchoSuppressed` or `NoChange`. The core tests prove all three (`SyncProcessorTests`); the sandbox run is Phase 2.
+the sync's own write ends as `EchoSuppressed` or `NoChange`. The core tests prove all three (`SyncProcessorTests`); the sandbox run is Phase 2. The host runs locally against Azurite (`docs/running-locally.md`).
 
 ## Phase 2: real systems
 
 - [!] Sandbox: one throwaway Jira project, one throwaway ADO project and a mapping between them. Blocked until the Jira
   site URL and the ADO organization and projects are known; needed only for tests against real systems
-- [ ] Record one real delivery per event type (Jira webhook, ADO service hook) and keep it as a fixture without
-  personal data. Confirm whether `resource.revision.fields` carries the full state; the ADO parser is defensive until
-  then
+- [ ] Record one real delivery per event type (Jira webhook, ADO service hook) and keep it as a fixture without personal
+  data. Confirm the `X-Hub-Signature` format of Jira (ADR 0006), and whether `resource.revision.fields` carries the full
+  state. The ADO parser is defensive until then
 - [ ] Decision: register the Jira webhook per project or globally (DESIGN.md section 11; depends on the admin rights of
   the person installing it)
 - [ ] Webhook operations: a timer function (or a runbook) refreshes the REST-registered Jira webhooks, which expire
   after 30 days. Someone checks the ADO Service Hooks page for subscriptions on probation or disabled (ADR 0003)
 - [ ] Deployment example as infrastructure as code: Function app, storage account, Key Vault, managed identity with
-  access to the ADO organization; documented in `docs/`
+  access to the storage and the ADO organization, a lifecycle rule that deletes raw deliveries after seven days (ADR
+  0004), and an alert on the poison queue. Documented in `docs/`
 - [ ] Repeatable end-to-end run in the sandbox for both directions, the echo case and a duplicate delivery
 - [ ] SBOM for the released Function package (baseline rule SEC-002)
 - [ ] Release 0.1.0
@@ -117,6 +122,9 @@ Each item brings its configuration, schema and loader validation along; nothing 
 - [ ] Links: `linkTypeMap` from Jira link types to ADO link types; unmapped links are skipped (DESIGN.md section 8)
 - [ ] Iterations: Jira sprint to ADO iteration. Decision: by name or by a table in the configuration (DESIGN.md
   section 11)
+
+- - [ ] Status changes that need several Jira transitions: today a status without a direct transition from the current
+  state throws, so the event is retried and ends in the poison queue
 
 ## Phase 4: conflict policies
 
@@ -156,7 +164,7 @@ Ongoing work outside the phases.
 | --- | --- | --- |
 | Inline processing or a queue: decided, [ADR 0004](adr/0004-acknowledge-and-enqueue-deliveries.md) | Phase 1 | DESIGN.md, section 3 |
 | Retry strategy and limits | Phase 1 | DESIGN.md, section 11 |
-| Webhook authentication per source | Phase 1 | DESIGN.md, section 9 |
+| Webhook authentication per source: decided, [ADR 0006](adr/0006-webhook-authentication.md) | Phase 1 | DESIGN.md, section 9 |
 | JSON Schema check in tests: NJsonSchema, decided (`docs/dependencies.md`) | Phase 1 | Loader and schema can drift |
 | Sandbox systems: Jira site, ADO organization and projects | Phase 2 | Needed for tests against real systems |
 | Jira webhook per project or global | Phase 2 | DESIGN.md, section 11 |

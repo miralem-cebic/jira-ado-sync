@@ -35,7 +35,7 @@
 Components:
 
 - **Jira webhook receiver:** HTTP-triggered function. Authenticates the request, stores the raw delivery in Blob Storage
-  and enqueues it, then answers `202` (ADR 0004). Changes arrive by webhook, not by polling (ADR 0003).
+  and enqueues it, then answers `202` (ADR 0004; the other codes are in ADR 0007). Changes arrive by webhook, not by polling (ADR 0003).
 - **ADO service hook receiver:** HTTP-triggered function, same pattern.
 - **Processor:** queue-triggered function. Reads the stored delivery, parses it and runs the sync processor. A failure
   that can succeed later is thrown, so the queue retries it (ADR 0004).
@@ -95,6 +95,7 @@ Secrets never live in the config file.
 
 - **Jira:** API token of a dedicated service account. Stored as an app setting or in Key Vault.
 - **ADO:** Managed Identity of the Function, granted access to the ADO organization. A PAT is supported for local testing only.
+- **Settings:** the configuration names the settings for the Jira API token and webhook secret, and for the ADO service hook credentials (`jira.apiTokenSetting`, `jira.webhookSecretSetting`, `azureDevOps.webhookUserSetting`, `azureDevOps.webhookPasswordSetting`). The host reads them at startup.
 - **Webhook authentication:** per source. Jira signs deliveries of admin webhooks that have a secret with an HMAC in the
   `X-Hub-Signature` header. ADO sends basic authentication, which must use HTTPS. Requests without a valid credential are
   rejected. The exact checks are in ADR 0006.

@@ -36,3 +36,8 @@ dotnet_diagnostic.CS1591.severity = none
 dotnet_diagnostic.CA1515.severity = none
 # CA2000: the test doubles hand their HTTP messages to a stub that owns them for the length of one test.
 dotnet_diagnostic.CA2000.severity = none
+
+[src/JiraAdoSync.Functions/**.cs]
+# An application, not a library: the worker finds its public function classes and their triggers by reflection (ADR 0008).
+dotnet_diagnostic.CA1515.severity = none
+

@@ -10,11 +10,17 @@ public class SyncConfigLoaderTests
       "jira": {
         "siteUrl": "https://example.atlassian.net",
         "authMode": "apiToken",
-        "apiTokenSetting": "JIRA_API_TOKEN"
+        "apiTokenSetting": "JIRA_API_TOKEN",
+        "accountEmail": "sync@example.test",
+        "serviceAccountId": "jira-service-account",
+        "webhookSecretSetting": "JIRA_WEBHOOK_SECRET"
       },
       "azureDevOps": {
         "organization": "example-org",
-        "authMode": "managedIdentity"
+        "authMode": "managedIdentity",
+        "serviceIdentity": "sync-identity",
+        "webhookUserSetting": "ADO_WEBHOOK_USER",
+        "webhookPasswordSetting": "ADO_WEBHOOK_PASSWORD"
       },
       "conflictPolicy": "lastWriteWins",
       "features": { "title": true, "description": false },
@@ -53,6 +59,30 @@ public class SyncConfigLoaderTests
         Assert.Single(config.ProjectMappings);
         Assert.Equal("PROJ", config.ProjectMappings[0].JiraProject);
         Assert.Equal("Active", config.ProjectMappings[0].ToAdoState("In Progress"));
+    }
+
+    [Fact]
+    public void SyncIdentityAndWebhookSettingNamesAreLoaded()
+    {
+        var config = Assert.IsType<SyncConfig>(SyncConfigLoader.Parse(ValidJson).Config);
+
+        Assert.Equal("sync@example.test", config.Jira.AccountEmail);
+        Assert.Equal("jira-service-account", config.Jira.ServiceAccountId);
+        Assert.Equal("JIRA_WEBHOOK_SECRET", config.Jira.WebhookSecretSetting);
+        Assert.Equal("sync-identity", config.AzureDevOps.ServiceIdentity);
+        Assert.Equal("ADO_WEBHOOK_USER", config.AzureDevOps.WebhookUserSetting);
+        Assert.Equal("ADO_WEBHOOK_PASSWORD", config.AzureDevOps.WebhookPasswordSetting);
+    }
+
+    [Fact]
+    public void BlankWebhookSecretSettingNameIsRejected()
+    {
+        var json = ValidJson.Replace("\"webhookSecretSetting\": \"JIRA_WEBHOOK_SECRET\"", "\"webhookSecretSetting\": \"  \"", StringComparison.Ordinal);
+
+        var result = SyncConfigLoader.Parse(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("jira.webhookSecretSetting", result.Errors[0], StringComparison.Ordinal);
     }
 
     [Fact]
@@ -151,8 +181,15 @@ public class SyncConfigLoaderTests
     {
         var json = """
         {
-          "jira": { "siteUrl": "https://example.atlassian.net", "authMode": "apiToken", "apiTokenSetting": "JIRA_API_TOKEN" },
-          "azureDevOps": { "organization": "example-org", "authMode": "managedIdentity" },
+          "jira": {
+            "siteUrl": "https://example.atlassian.net", "authMode": "apiToken", "apiTokenSetting": "JIRA_API_TOKEN",
+            "accountEmail": "sync@example.test", "serviceAccountId": "jira-service-account",
+            "webhookSecretSetting": "JIRA_WEBHOOK_SECRET"
+          },
+          "azureDevOps": {
+            "organization": "example-org", "authMode": "managedIdentity", "serviceIdentity": "sync-identity",
+            "webhookUserSetting": "ADO_WEBHOOK_USER", "webhookPasswordSetting": "ADO_WEBHOOK_PASSWORD"
+          },
           "conflictPolicy": "lastWriteWins",
           "projectMappings": []
         }

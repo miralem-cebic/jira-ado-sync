@@ -12,7 +12,7 @@
     "jira": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["siteUrl", "authMode", "apiTokenSetting"],
+      "required": ["siteUrl", "authMode", "apiTokenSetting", "accountEmail", "serviceAccountId", "webhookSecretSetting"],
       "properties": {
         "siteUrl": {
           "type": "string",
@@ -28,6 +28,24 @@
           "minLength": 1,
           "pattern": "\\S",
           "description": "Name of the app setting or environment variable that holds the API token."
+        },
+        "accountEmail": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "E-mail of the service account. Sent with the API token in basic authentication."
+        },
+        "serviceAccountId": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "accountId of the service account. Its own changes are not echoed back."
+        },
+        "webhookSecretSetting": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Name of the app setting that holds the secret of the Jira webhook."
         }
       }
     },
@@ -35,7 +53,7 @@
     "azureDevOps": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["organization", "authMode"],
+      "required": ["organization", "authMode", "serviceIdentity", "webhookUserSetting", "webhookPasswordSetting"],
       "properties": {
         "organization": {
           "type": "string",
@@ -52,6 +70,24 @@
           "minLength": 1,
           "pattern": "\\S",
           "description": "Name of the app setting that holds the PAT. Required when authMode is pat."
+        },
+        "serviceIdentity": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Unique name of the identity the sync writes as. Its own changes are not echoed back."
+        },
+        "webhookUserSetting": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Name of the app setting that holds the user name of the service hook's basic authentication."
+        },
+        "webhookPasswordSetting": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Name of the app setting that holds the password of the service hook's basic authentication."
         }
       },
       "anyOf": [

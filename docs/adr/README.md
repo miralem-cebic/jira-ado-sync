@@ -15,3 +15,5 @@ The initial design (Azure Function, Table Storage, loop prevention, last write w
 | [0004](0004-acknowledge-and-enqueue-deliveries.md) | Acknowledge and enqueue webhook deliveries | Accepted |
 | [0005](0005-outbound-retry-strategy.md) | Outbound retry strategy | Accepted |
 | [0006](0006-webhook-authentication.md) | Webhook authentication per source | Accepted |
+| [0007](0007-webhook-receiver-status-codes.md) | Response codes of the webhook receiver | Accepted |
+| [0008](0008-azure-functions-host.md) | Azure Functions host | Accepted |

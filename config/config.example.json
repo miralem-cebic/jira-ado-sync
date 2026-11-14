@@ -4,12 +4,18 @@
   "jira": {
     "siteUrl": "https://your-site.atlassian.net",
     "authMode": "apiToken",
-    "apiTokenSetting": "JIRA_API_TOKEN"
+    "apiTokenSetting": "JIRA_API_TOKEN",
+    "accountEmail": "sync-service@example.com",
+    "serviceAccountId": "your-jira-service-account-id",
+    "webhookSecretSetting": "JIRA_WEBHOOK_SECRET"
   },
 
   "azureDevOps": {
     "organization": "your-org",
-    "authMode": "managedIdentity"
+    "authMode": "managedIdentity",
+    "serviceIdentity": "your-sync-identity",
+    "webhookUserSetting": "ADO_WEBHOOK_USER",
+    "webhookPasswordSetting": "ADO_WEBHOOK_PASSWORD"
   },
 
   "conflictPolicy": "lastWriteWins",
