@@ -30,6 +30,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - CI: ShellCheck, the gate, a vulnerable package report, the Conventional Commit check of PR titles and the baseline
   conformance check in strict mode. Releases from `v*` tags with generated notes. Dependabot for NuGet, the .NET SDK
   and GitHub Actions. `scripts/apply-repo-settings.sh` for the repository settings.
+- Sync processor (`SyncProcessor`) and the ports it needs: `IJiraClient`, `IAdoClient` and `ISyncStateStore`. The state
+  save uses an ETag, so two concurrent events for one pair cannot both win. Tested against fakes: a delivery sent twice
+  writes once, an echo of the sync's own write is not written, an older change does not overwrite a newer one, a failed
+  write saves nothing, and a lost save race is reported as a conflict.
+- Architecture decisions: changes arrive by webhook, not by polling (`docs/adr/0003-receive-changes-by-webhook.md`);
+  deliveries are acknowledged and enqueued, because the vendors' retry rules make inline processing unsafe
+  (`docs/adr/0004-acknowledge-and-enqueue-deliveries.md`).
+- `SkipReason.NotLinked`: a change to an item without a stored pair is skipped. Creating the item on the other side is
+  Phase 3.
 
 ### Changed
 

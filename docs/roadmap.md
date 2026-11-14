@@ -1,7 +1,7 @@
 # Roadmap
 
 jira-ado-sync keeps Jira Cloud issues and Azure DevOps work items in step, in both directions, as an Azure Function.
-The design is in [DESIGN.md](DESIGN.md); this file plans the way there. Status: 12 November 2026.
+The design is in [DESIGN.md](DESIGN.md); this file plans the way there. Status: 14 November 2026.
 
 Legend: `[ ]` open · `[~]` in progress · `[x]` done · `[!]` blocked
 
@@ -51,10 +51,12 @@ Moved out of this phase, because they are not foundation work: the schema check 
 Goal: a change of title, description or status travels Jira → ADO and ADO → Jira through the Function, and its echo is
 not written back.
 
-- [ ] Decision (ADR): process a webhook inline, or acknowledge and enqueue it (DESIGN.md, section 3). Depends on how
-  long each source waits for a response and how it retries
-- [ ] Interfaces in the core for the Jira client, the ADO client and the state store; `TimeProvider` where a clock is
-  needed
+- [x] Decision (ADR): acknowledge and enqueue deliveries ([ADR 0004](adr/0004-acknowledge-and-enqueue-deliveries.md)),
+  with webhooks as the transport ([ADR 0003](adr/0003-receive-changes-by-webhook.md)). The vendors' retry rules decide
+  it: ADO retries only 408, 502, 503 and 504, and any other error puts the subscription on probation
+- [x] Interfaces in the core: `IJiraClient`, `IAdoClient` and `ISyncStateStore` (save with ETag), used by
+  `SyncProcessor`, which is tested against fakes. The processor needs no clock, so `TimeProvider` comes in with the host
+  that needs one
 - [ ] Check `config.example.json` against `config.schema.json` in a test, so the schema (for editors) and the loader
   (authoritative) cannot drift once this phase adds settings (webhook secrets, the sync's own Jira account and ADO
   identity). .NET has no JSON Schema validator: needs a decision on a package (`docs/dependencies.md`) or another way
@@ -68,7 +70,8 @@ not written back.
 - [ ] Contract tests for both clients against recorded responses (DESIGN.md, section 10)
 - [ ] State store on Azure Table Storage: table `SyncItems` as in DESIGN.md section 4. Writes use the entity ETag, so
   two concurrent events for one pair cannot both win
-- [ ] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook
+- [ ] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook,
+  and a queue trigger for the processor (ADR 0004)
 - [ ] Webhook authentication: requests without a valid secret are rejected (shared secret or HMAC, per source;
   DESIGN.md section 9)
 - [ ] Security headers on every response: `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
@@ -76,11 +79,11 @@ not written back.
   (proposed, surface `api`) then pass
 - [ ] `CA2007` decided for the host project, with the reason next to the setting (ADR 0002)
 - [ ] One log line per event: source, item, the engine's decision (`SkipReason` or apply). No tokens, no field contents
-- [ ] New packages (Functions worker, `Azure.Data.Tables`, `Azure.Identity`) in `docs/dependencies.md`, each used only
-  outside the core
+- [ ] New packages (Functions worker and its storage bindings, `Azure.Data.Tables`, `Azure.Identity`, Blob Storage for
+  the raw deliveries) in `docs/dependencies.md`, each used only outside the core
 
 **Acceptance:** the same event delivered twice writes once; an older event never overwrites a newer change; the echo of
-the sync's own write ends as `EchoSuppressed` or `NoChange`. Proven by tests and, with Phase 2, in the sandbox.
+the sync's own write ends as `EchoSuppressed` or `NoChange`. The core tests prove all three (`SyncProcessorTests`); the sandbox run is Phase 2.
 
 ## Phase 2: real systems
 
@@ -91,6 +94,8 @@ the sync's own write ends as `EchoSuppressed` or `NoChange`. Proven by tests and
   then
 - [ ] Decision: register the Jira webhook per project or globally (DESIGN.md section 11; depends on the admin rights of
   the person installing it)
+- [ ] Webhook operations: a timer function (or a runbook) refreshes the REST-registered Jira webhooks, which expire
+  after 30 days. Someone checks the ADO Service Hooks page for subscriptions on probation or disabled (ADR 0003)
 - [ ] Deployment example as infrastructure as code: Function app, storage account, Key Vault, managed identity with
   access to the ADO organization; documented in `docs/`
 - [ ] Repeatable end-to-end run in the sandbox for both directions, the echo case and a duplicate delivery
@@ -146,7 +151,7 @@ Ongoing work outside the phases.
 
 | Decision | Needed for | Source |
 | --- | --- | --- |
-| Inline processing or a queue | Phase 1 | DESIGN.md, section 3 |
+| Inline processing or a queue: decided, [ADR 0004](adr/0004-acknowledge-and-enqueue-deliveries.md) | Phase 1 | DESIGN.md, section 3 |
 | Retry strategy and limits | Phase 1 | DESIGN.md, section 11 |
 | Webhook authentication per source | Phase 1 | DESIGN.md, section 9 |
 | JSON Schema check in tests: which package, if any | Phase 1 | Loader and schema can drift |

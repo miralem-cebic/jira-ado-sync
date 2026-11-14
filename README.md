@@ -7,7 +7,7 @@ A configurable, bidirectional sync between **Jira Cloud** and **Azure DevOps** w
 
 Atlassian's built-in Azure DevOps connector only syncs in one direction. This project aims to keep both systems in step, so that teams working in either tool see the same state.
 
-> **Status:** early design. The pure core (sync engine, configuration loader, webhook parsers and request builders) exists and is tested; the Azure Functions host, the REST clients and the state store do not exist yet. See [docs/DESIGN.md](docs/DESIGN.md) and the [roadmap](docs/roadmap.md). Nothing is production-ready yet.
+> **Status:** early design. The pure core (sync engine, configuration loader, webhook parsers, request builders and the sync processor with its ports) exists and is tested; the Azure Functions host, the REST clients and the state store do not exist yet. See [docs/DESIGN.md](docs/DESIGN.md) and the [roadmap](docs/roadmap.md). Nothing is production-ready yet.
 
 ## Goals
 
