@@ -31,3 +31,14 @@ uses these packages. The core and the Jira and ADO adapters use none of them. Th
 | `Microsoft.CodeAnalysis.BannedApiAnalyzers` | Enforces `BannedSymbols.txt` (no wall clock, no blocking waits) | None in the SDK | MIT |
 | `xunit.v3.mtp-v2` | Test framework on Microsoft.Testing.Platform | MSTest (Microsoft): xUnit v3 is what the other baseline projects use and measure | Apache 2.0 |
 | `NJsonSchema` 11.6.2, with its transitive `Newtonsoft.Json`, `Namotion.Reflection` and `NJsonSchema.Annotations` | Validates `config.example.json` and `config.schema.json` in `ConfigSchemaTests`, so the schema for editors and the loader cannot drift. Test only, not in the shipped package. NJsonSchema reads every schema as draft 4, so the schema uses only keywords that draft 4 and 2020-12 share | The base class library has no JSON Schema validator. JsonSchema.Net was considered: it supports draft 2020-12, but its binary package is offered under a maintenance-fee agreement for revenue-generating users with at least US$10,000 gross revenue (the source is MIT). A hand-written validator would test our own code | MIT (all four packages) |
+
+## Scripts (not shipped)
+
+The scripts in `scripts/` run outside the solution. `smoke-local.py` uses only the Python standard library. The replay script
+needs the two packages below, pinned in `scripts/requirements-replay.txt`.
+
+| Package | Purpose | Native alternative considered | Licence |
+|---|---|---|---|
+| `azure-storage-queue` 12.14.1 | Reads and sends the messages of the poison queue in `scripts/replay-poison.py` (ADR 0010) | The REST API directly: rejected, the SDK does the signing and the Base64 encoding of the queue trigger | MIT |
+| `azure-storage-blob` 12.24.0 | Checks that the raw body of a poison message still exists (ADR 0010) | The REST API directly, as above | MIT |
+

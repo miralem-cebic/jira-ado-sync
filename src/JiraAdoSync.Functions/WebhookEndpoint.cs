@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using JiraAdoSync.Azure;
 using JiraAdoSync.Core.Delivery;
@@ -8,14 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace JiraAdoSync.Functions;
 
-/// <summary>The part the two webhook endpoints share: read the request, let the receiver decide, answer with its status (ADR 0007).</summary>
+/// <summary>
+/// The part the two webhook endpoints share. The decisions are in <c>WebhookDelivery</c>. This class only reads the headers,
+/// logs the decision and writes the response, with the security headers (ADR 0007, ADR 0009).
+/// </summary>
 internal static class WebhookEndpoint
 {
-    /// <summary>Receives one delivery and returns the response of ADR 0007.</summary>
-    [SuppressMessage(
-        "Design",
-        "CA1031:Do not catch general exception types",
-        Justification = "Any failure of the receiver must become a 503 (ADR 0007). The vendor retries it. An unhandled exception would become a 500, which ADO treats as enduring.")]
+    /// <summary>Receives one delivery and returns the response.</summary>
     public static async Task<HttpResponseData> ReceiveAsync(
         HttpRequestData request,
         WebhookReceiver receiver,
@@ -23,25 +21,22 @@ internal static class WebhookEndpoint
         Side source,
         CancellationToken cancellationToken)
     {
-        var body = await ReadBodyAsync(request.Body, cancellationToken).ConfigureAwait(false);
-        var signature = FirstHeader(request, "X-Hub-Signature");
-        var authorization = FirstHeader(request, "Authorization");
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(receiver);
+        ArgumentNullException.ThrowIfNull(logger);
 
-        ReceiveResult result;
-        try
-        {
-            result = await receiver.ReceiveAsync(new WebhookRequest(source, body, signature, authorization), cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            SyncLog.DeliveryReceiveFailed(logger, source, ex);
-            result = ReceiveResult.Unavailable;
-        }
+        var answer = await WebhookDelivery.HandleAsync(
+            request.Body,
+            WebhookDelivery.ParseContentLength(FirstHeader(request, "Content-Length")),
+            source,
+            FirstHeader(request, "X-Hub-Signature"),
+            FirstHeader(request, "Authorization"),
+            receiver,
+            cancellationToken).ConfigureAwait(false);
 
-        SyncLog.DeliveryAnswered(logger, source, result);
+        Log(logger, source, answer);
 
-        var response = request.CreateResponse((HttpStatusCode)result.ToHttpStatusCode());
+        var response = request.CreateResponse((HttpStatusCode)answer.StatusCode);
         foreach (var header in ResponseHeaders.Security)
         {
             response.Headers.Add(header.Key, header.Value);
@@ -50,11 +45,20 @@ internal static class WebhookEndpoint
         return response;
     }
 
-    private static async Task<byte[]> ReadBodyAsync(Stream body, CancellationToken cancellationToken)
+    private static void Log(ILogger logger, Side source, WebhookAnswer answer)
     {
-        using var buffer = new MemoryStream();
-        await body.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
-        return buffer.ToArray();
+        if (answer.Failed)
+        {
+            SyncLog.DeliveryReceiveFailed(logger, source, answer.Error);
+        }
+        else if (answer.TooLarge)
+        {
+            SyncLog.DeliveryTooLarge(logger, source, WebhookLimits.MaxBodyBytes);
+        }
+        else
+        {
+            SyncLog.DeliveryAnswered(logger, source, answer.Result!.Value);
+        }
     }
 
     private static string? FirstHeader(HttpRequestData request, string name) =>

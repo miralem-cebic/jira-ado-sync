@@ -9,5 +9,6 @@
     <Project Path="tests/JiraAdoSync.Core.Tests/JiraAdoSync.Core.Tests.csproj" />
     <Project Path="tests/JiraAdoSync.Adapters.Tests/JiraAdoSync.Adapters.Tests.csproj" />
     <Project Path="tests/JiraAdoSync.Azure.Tests/JiraAdoSync.Azure.Tests.csproj" />
+    <Project Path="tests/JiraAdoSync.Functions.Tests/JiraAdoSync.Functions.Tests.csproj" />
   </Folder>
 </Solution>

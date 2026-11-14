@@ -14,7 +14,11 @@ public sealed record SyncHostSettings(
     string JiraApiToken,
     WebhookSecrets WebhookSecrets,
     SyncIdentities Identities,
-    string? AdoPersonalAccessToken);
+    string? AdoPersonalAccessToken)
+{
+    /// <summary>Prints no value, so that a log line or a debugger view cannot show a secret.</summary>
+    public override string ToString() => "SyncHostSettings { redacted }";
+}
 
 /// <summary>
 /// Validates the configuration and reads the secrets it names. Startup stops with one error that lists every problem.

@@ -17,3 +17,5 @@ The initial design (Azure Function, Table Storage, loop prevention, last write w
 | [0006](0006-webhook-authentication.md) | Webhook authentication per source | Accepted |
 | [0007](0007-webhook-receiver-status-codes.md) | Response codes of the webhook receiver | Accepted |
 | [0008](0008-azure-functions-host.md) | Azure Functions host | Accepted |
+| [0009](0009-maximum-webhook-body-size.md) | Maximum size of a webhook body | Accepted |
+| [0010](0010-delivery-queue-retry-and-poison.md) | Retry window and poison queue of the delivery queue | Accepted |
