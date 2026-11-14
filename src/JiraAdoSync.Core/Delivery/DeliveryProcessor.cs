@@ -73,8 +73,8 @@ public sealed class DeliveryProcessor
 
         var outcome = await _sync.ProcessAsync(parsed.Change, mapping, cancellationToken).ConfigureAwait(false);
         return outcome is SyncOutcome.Conflict
-            ? new DeliveryOutcome.RetryLater()
-            : new DeliveryOutcome.Processed(outcome);
+            ? new DeliveryOutcome.RetryLater(parsed.Change.SourceItemId)
+            : new DeliveryOutcome.Processed(outcome, parsed.Change.SourceItemId);
     }
 
     /// <summary>Parses the body with the webhook parser of its source. Returns null for an event the parser does not handle.</summary>

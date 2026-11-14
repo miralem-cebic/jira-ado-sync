@@ -71,6 +71,7 @@ public class DeliveryProcessorTests
 
         var processed = Assert.IsType<DeliveryOutcome.Processed>(outcome);
         Assert.IsType<SyncOutcome.Written>(processed.Outcome);
+        Assert.Equal("PROJ-1", processed.SourceItemId);
         var write = Assert.Single(ado.Applied);
         Assert.Equal("42", write.WorkItemId);
         Assert.Equal("New title", write.Item.Title);

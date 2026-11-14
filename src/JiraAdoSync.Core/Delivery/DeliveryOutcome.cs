@@ -30,12 +30,14 @@ public abstract record DeliveryOutcome
 
     /// <summary>The change went through the sync. <paramref name="Outcome"/> says whether it was written or skipped.</summary>
     /// <param name="Outcome">The result of the sync processor.</param>
-    public sealed record Processed(SyncOutcome Outcome) : DeliveryOutcome;
+    /// <param name="SourceItemId">The Jira issue key or the ADO work item id of the changed item. It is not personal data.</param>
+    public sealed record Processed(SyncOutcome Outcome, string SourceItemId) : DeliveryOutcome;
 
     /// <summary>The delivery cannot be synced. The queue completes the message.</summary>
     /// <param name="Reason">Why the delivery is dropped.</param>
     public sealed record Dropped(DropReason Reason) : DeliveryOutcome;
 
     /// <summary>Another writer changed the pair first. The host throws, so that the queue retries the message (ADR 0004).</summary>
-    public sealed record RetryLater : DeliveryOutcome;
+    /// <param name="SourceItemId">The Jira issue key or the ADO work item id of the item, for the log.</param>
+    public sealed record RetryLater(string SourceItemId) : DeliveryOutcome;
 }

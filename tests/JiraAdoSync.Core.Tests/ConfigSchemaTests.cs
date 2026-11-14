@@ -36,6 +36,10 @@ public class ConfigSchemaTests
         yield return Case("whitespace-only area path", Variant(n => Mapping(n)["areaPath"] = JsonValue.Create("   ")), valid: false);
         yield return Case("feature flag as text", Variant(n => Obj(n, "features")["title"] = JsonValue.Create("yes")), valid: false);
         yield return Case("features omitted", Variant(n => n.Remove("features")), valid: true);
+        yield return Case("Jira webhook secret setting missing", Variant(n => Obj(n, "jira").Remove("webhookSecretSetting")), valid: false);
+        yield return Case("Jira account email missing", Variant(n => Obj(n, "jira").Remove("accountEmail")), valid: false);
+        yield return Case("whitespace-only service identity", Variant(n => Obj(n, "azureDevOps")["serviceIdentity"] = JsonValue.Create("  ")), valid: false);
+        yield return Case("ADO webhook password setting missing", Variant(n => Obj(n, "azureDevOps").Remove("webhookPasswordSetting")), valid: false);
         yield return Case("no project mapping", Variant(n => n["projectMappings"] = new JsonArray()), valid: false);
         yield return Case("conflict policy missing", Variant(n => n.Remove("conflictPolicy")), valid: false);
     }

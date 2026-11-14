@@ -88,7 +88,33 @@ public static partial class SyncConfigLoader
             valid = false;
         }
 
-        return valid ? new JiraSettings(uri!, jira.AuthMode!, jira.ApiTokenSetting!) : null;
+        if (string.IsNullOrWhiteSpace(jira.AccountEmail))
+        {
+            errors.Add("jira.accountEmail: is required.");
+            valid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(jira.ServiceAccountId))
+        {
+            errors.Add("jira.serviceAccountId: is required. It is the accountId of the sync's own service account.");
+            valid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(jira.WebhookSecretSetting))
+        {
+            errors.Add("jira.webhookSecretSetting: is required and must name a setting, not contain the secret.");
+            valid = false;
+        }
+
+        return valid
+            ? new JiraSettings(
+                uri!,
+                jira.AuthMode!,
+                jira.ApiTokenSetting!,
+                jira.AccountEmail!,
+                jira.ServiceAccountId!,
+                jira.WebhookSecretSetting!)
+            : null;
     }
 
     private static AzureDevOpsSettings? ValidateAzureDevOps(AzureDevOpsFile? ado, List<string> errors)
@@ -119,8 +145,32 @@ public static partial class SyncConfigLoader
             valid = false;
         }
 
+        if (string.IsNullOrWhiteSpace(ado.ServiceIdentity))
+        {
+            errors.Add("azureDevOps.serviceIdentity: is required. It is the unique name of the sync's own identity.");
+            valid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(ado.WebhookUserSetting))
+        {
+            errors.Add("azureDevOps.webhookUserSetting: is required and must name a setting, not contain the user name.");
+            valid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(ado.WebhookPasswordSetting))
+        {
+            errors.Add("azureDevOps.webhookPasswordSetting: is required and must name a setting, not contain the password.");
+            valid = false;
+        }
+
         return valid
-            ? new AzureDevOpsSettings(ado.Organization!, ado.AuthMode!, ado.PatSetting)
+            ? new AzureDevOpsSettings(
+                ado.Organization!,
+                ado.AuthMode!,
+                ado.PatSetting,
+                ado.ServiceIdentity!,
+                ado.WebhookUserSetting!,
+                ado.WebhookPasswordSetting!)
             : null;
     }
 
@@ -262,6 +312,12 @@ public static partial class SyncConfigLoader
         public string? AuthMode { get; set; }
 
         public string? ApiTokenSetting { get; set; }
+
+        public string? AccountEmail { get; set; }
+
+        public string? ServiceAccountId { get; set; }
+
+        public string? WebhookSecretSetting { get; set; }
     }
 
     private sealed class AzureDevOpsFile
@@ -271,6 +327,12 @@ public static partial class SyncConfigLoader
         public string? AuthMode { get; set; }
 
         public string? PatSetting { get; set; }
+
+        public string? ServiceIdentity { get; set; }
+
+        public string? WebhookUserSetting { get; set; }
+
+        public string? WebhookPasswordSetting { get; set; }
     }
 
     private sealed class FeaturesFile
