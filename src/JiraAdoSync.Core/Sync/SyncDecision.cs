@@ -17,6 +17,9 @@ public enum SkipReason
 
     /// <summary>The event is older than the last applied change (last write wins).</summary>
     StaleEvent,
+
+    /// <summary>The item has no stored pair. Creating it on the other side is Phase 3.</summary>
+    NotLinked,
 }
 
 /// <summary>Result of <see cref="SyncEngine.Decide"/>: either <see cref="Skip"/> or <see cref="Apply"/>, nothing else.</summary>
