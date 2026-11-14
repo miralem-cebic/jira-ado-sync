@@ -69,6 +69,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Smoke script for a local host (`scripts/smoke-local.py`): the requests of the local run, with the status codes and the
   security headers checked.
 - Tests for the Functions host (`JiraAdoSync.Functions.Tests`): the registration and the lifetime of the clients.
+- Repository logo: `docs/assets/logo.svg` (light and dark variant) and the mark alone in `docs/assets/logo-mark.svg`.
 
 ### Changed
 
@@ -84,6 +85,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `azureDevOps.webhookUserSetting` and `azureDevOps.webhookPasswordSetting` are required. They name the sync's own identities
   and the settings that hold the webhook credentials. A configuration without them no longer loads.
 - `host.json` sets the queue retry: `maxDequeueCount` 10 and `visibilityTimeout` one minute (ADR 0010).
+- README rewritten: build and test, local run, configuration, Jira webhook and ADO service hook setup, a deployment
+  outline that is not automated yet, and operations. The architecture diagram in `docs/DESIGN.md` is Mermaid, and its
+  section 4 lists the `SyncItems` columns as the code writes them.
 
 
 ### Fixed

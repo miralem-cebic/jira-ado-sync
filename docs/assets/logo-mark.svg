@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="mark-title">
+  <title id="mark-title">jira-ado-sync</title>
+  <g transform="translate(4 4)">
+    <rect x="8" y="58" width="56" height="56" rx="14" fill="#1F6FEB"/>
+    <rect x="96" y="58" width="56" height="56" rx="14" fill="#14B8A6"/>
+    <path d="M36 50 C36 8 124 8 124 50" fill="none" stroke="#1F6FEB" stroke-width="9" stroke-linecap="round"/>
+    <path d="M112 38 L124 54 L136 38" fill="none" stroke="#1F6FEB" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M124 110 C124 152 36 152 36 110" fill="none" stroke="#14B8A6" stroke-width="9" stroke-linecap="round"/>
+    <path d="M24 122 L36 106 L48 122" fill="none" stroke="#14B8A6" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

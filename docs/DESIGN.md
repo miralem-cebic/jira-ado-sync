@@ -15,21 +15,34 @@
 
 ## 3. Architecture
 
-```
-            ┌────────────────┐   webhook (issue created/updated,
-            │  Jira Cloud    │   comment created, issuelink created)
-            └──────┬─▲───────┘
-          webhook  │ │ REST API v3 (writes)
-                   ▼ │
-          ┌──────────────────────┐        ┌──────────────────────────┐
-          │ Azure Function       │ ◄────► │ Azure Table Storage      │
-          │ (HTTP triggers)      │        │ ID mapping + sync state  │
-          └──────┬─▲─────────────┘        └──────────────────────────┘
-   REST (writes)  │ │ service hook (work item created/updated)
-                  ▼ │
-          ┌────────────────┐
-          │ Azure DevOps   │
-          └────────────────┘
+```mermaid
+flowchart TB
+    jira["Jira Cloud"]
+    ado["Azure DevOps"]
+
+    subgraph fn["Azure Function App"]
+        jiraIn["Jira webhook receiver<br/>POST /api/webhooks/jira"]
+        adoIn["ADO service hook receiver<br/>POST /api/webhooks/ado"]
+        proc["Delivery processor<br/>queue trigger"]
+        engine["Sync engine<br/>pure logic"]
+    end
+
+    subgraph storage["Azure Storage"]
+        blob[("Blob: raw-deliveries")]
+        queue[["Queue: sync-deliveries"]]
+        table[("Table: SyncItems")]
+    end
+
+    jira -- "webhook, HMAC-SHA256 signature" --> jiraIn
+    ado -- "service hook, basic auth over HTTPS" --> adoIn
+    jiraIn -- "store body, enqueue, answer 202" --> storage
+    adoIn -- "store body, enqueue, answer 202" --> storage
+    queue -- "trigger" --> proc
+    proc -- "read stored body" --> blob
+    proc --> engine
+    proc -- "load and save state (ETag)" --> table
+    proc -- "REST update and transition<br/>API token" --> jira
+    proc -- "PATCH with /rev test<br/>managed identity" --> ado
 ```
 
 Components:
@@ -43,19 +56,23 @@ Components:
 - **Adapters:** `JiraClient` and `AdoClient`, thin REST wrappers.
 - **State store:** Azure Table Storage. One row per synced item.
 
+The projects map to these components: `JiraAdoSync.Core` (pure: sync engine, parsers, ports), `JiraAdoSync.Adapters`
+(REST clients and retry), `JiraAdoSync.Azure` (storage and delivery handling) and `JiraAdoSync.Functions` (host and triggers).
+
 ## 4. Data model
 
 Table `SyncItems`, one row per linked pair:
 
 | Field | Meaning |
 |---|---|
-| `PartitionKey` | `projectMappingId` from the config |
+| `PartitionKey` | Mapping id from the config, the Jira project key (e.g. `PROJ`) |
 | `RowKey` | Jira issue key, e.g. `PROJ-123` |
 | `AdoWorkItemId` | ADO work item ID |
-| `LastJiraUpdated` | Jira `updated` timestamp last written or seen |
-| `LastAdoRev` | ADO `rev` last written or seen |
-| `LastWriterSystem` | `jira` or `ado`, the side that last wrote |
+| `LastChangedAt` | Time of the last synced change, used by the last write wins policy |
+| `LastWriter` | `jira` or `ado`, the side that last wrote |
 | `LastSyncedHash` | Hash of the synced field set at last sync (see loop prevention) |
+
+All four columns are required when a row is read. Saves check the ETag, so a concurrent write is a conflict and is retried.
 
 ## 5. Sync flow
 
