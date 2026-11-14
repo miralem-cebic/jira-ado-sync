@@ -34,7 +34,7 @@
 
 Components:
 
-- **Jira webhook receiver:** HTTP-triggered function. Authenticates the request, stores the raw delivery in Blob Storage
+- **Jira webhook receiver:** HTTP-triggered function. Reads at most 2 MiB (ADR 0009), authenticates the request, stores the raw delivery in Blob Storage
   and enqueues it, then answers `202` (ADR 0004; the other codes are in ADR 0007). Changes arrive by webhook, not by polling (ADR 0003).
 - **ADO service hook receiver:** HTTP-triggered function, same pattern.
 - **Processor:** queue-triggered function. Reads the stored delivery, parses it and runs the sync processor. A failure

@@ -46,7 +46,7 @@ Legend: `[ ]` open · `[~]` in progress · `[x]` done · `[!]` blocked
 Moved out of this phase, because they are not foundation work: the schema check (Phase 1) and the conformance pin
 (Maintenance, done with engineering-baseline v0.2.0).
 
-## Phase 1: walking skeleton
+## Phase 1: walking skeleton (done)
 
 Goal: a change of title, description or status travels Jira → ADO and ADO → Jira through the Function, and its echo is
 not written back.
@@ -61,16 +61,16 @@ not written back.
   NJsonSchema as a test-only dependency (`docs/dependencies.md`). It found three gaps: the loader accepted an empty ADO
   state, and the schema accepted whitespace and an `https://` URL without a host. Both sides now agree. Webhook settings
   get their own cases when they are added
-- [~] Jira REST client (API v3) in `JiraAdoSync.Adapters`: read the issue status, update summary and description, list
+- [x] Jira REST client (API v3) in `JiraAdoSync.Adapters`: read the issue status, update summary and description, list
   transitions and transition. The host sets the e-mail and the API token with `BasicAuthorizationHandler`, and the retry
-  policy in front. Recorded responses come in Phase 2
-- [~] ADO REST client (7.1) in `JiraAdoSync.Adapters`: read the revision, JSON Patch with the `/rev` test. The host sets
-  the managed identity (`BearerAuthorizationHandler`) or a PAT for local testing
-- [~] Retry strategy: decided in ADR 0005 and implemented in `RetryingHandler`. Open: the status code of a failed `/rev`
-  test, which needs a real response. The clients throw on any failure, so the queue reads the item again and decides
-  again (ADR 0004)
-- [~] Contract tests for both clients against the documented response shapes (DESIGN.md, section 10). Recorded responses
-  replace them in Phase 2
+  policy in front. Tested against the documented response shapes. Recorded responses are a Phase 2 item
+- [x] ADO REST client (7.1) in `JiraAdoSync.Adapters`: read the revision, JSON Patch with the `/rev` test. The host sets
+  the managed identity (`BearerAuthorizationHandler`) or a PAT for local testing. Tested against the documented response
+  shapes. Recorded responses are a Phase 2 item
+- [x] Retry strategy: decided in ADR 0005 and implemented in `RetryingHandler`. The clients throw on any failure, so the
+  queue reads the item again and decides again (ADR 0004). The status code of a failed `/rev` test is a Phase 2 item
+- [x] Contract tests for both clients against the documented response shapes (DESIGN.md, section 10). Recorded responses
+  are a Phase 2 item
 - [x] State store on Azure Table Storage (`TableSyncStateStore`): table `SyncItems` as in DESIGN.md section 4. The save
   uses the entity ETag, so two concurrent events for one pair cannot both win. Tested against Azurite
 - [x] Receiver and processor behind ports (ADR 0004, ADR 0007): `WebhookReceiver` authenticates, checks that the body is
@@ -99,6 +99,11 @@ the sync's own write ends as `EchoSuppressed` or `NoChange`. The core tests prov
 - [ ] Record one real delivery per event type (Jira webhook, ADO service hook) and keep it as a fixture without personal
   data. Confirm the `X-Hub-Signature` format of Jira (ADR 0006), and whether `resource.revision.fields` carries the full
   state. The ADO parser is defensive until then
+- - [ ] Confirm the size of real deliveries against the 2 MiB limit of ADR 0009. Raise the limit with a new ADR if Jira
+  needs more
+- - [ ] Record real Jira and ADO REST responses (issue read, transition, work item read, PATCH) and replace the
+  documented shapes in the contract tests. Confirm the status code of a failed `/rev` test. Carried over from Phase 1,
+  which tests against the documented shapes
 - [ ] Decision: register the Jira webhook per project or globally (DESIGN.md section 11; depends on the admin rights of
   the person installing it)
 - [ ] Webhook operations: a timer function (or a runbook) refreshes the REST-registered Jira webhooks, which expire

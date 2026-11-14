@@ -39,6 +39,13 @@ for items that are linked in the `SyncItems` table. Without a link, the change i
    `X-Hub-Signature: sha256=<hex HMAC-SHA256 of the body, keyed with JIRA_WEBHOOK_SECRET>`. The answer is `202`. Without a
    valid signature it is `401`, and a body that is not JSON gets `400` (ADR 0007).
 7. The host log shows the decision, for example `Delivery Jira item PROJ-1 (jira/…) processed: Skipped { Reason = NotLinked }.`
+8. Run the whole set of requests with the smoke script. It checks the status codes and the security headers, and it prints
+   one line per request:
+
+       JIRA_WEBHOOK_SECRET=local-jira-secret ADO_WEBHOOK_USER=hook-user ADO_WEBHOOK_PASSWORD=local-hook-password \
+         python3 scripts/smoke-local.py
+
+The poison queue and its replay are described in `docs/runbooks/poison-queue.md`.
 
 ## Tests against the emulator
 

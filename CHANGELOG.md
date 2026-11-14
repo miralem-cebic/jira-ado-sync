@@ -62,6 +62,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   security headers. Local run: `docs/running-locally.md`.
 - Authorization handlers for the REST clients: basic (Jira API token, ADO PAT) and bearer (ADO managed identity).
 - Log lines per event: source, item, blob name and decision. Bodies and secrets are never logged.
+- Webhook body limit of 2 MiB (ADR 0009): a larger body is answered with 413 before it is read to the end, and before it is
+  authenticated or stored.
+- Retry window and poison queue of the delivery queue (ADR 0010), with a runbook (`docs/runbooks/poison-queue.md`) and a
+  replay script (`scripts/replay-poison.py`).
+- Smoke script for a local host (`scripts/smoke-local.py`): the requests of the local run, with the status codes and the
+  security headers checked.
+- Tests for the Functions host (`JiraAdoSync.Functions.Tests`): the registration and the lifetime of the clients.
 
 ### Changed
 
@@ -76,3 +83,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Configuration: `jira.accountEmail`, `jira.serviceAccountId`, `jira.webhookSecretSetting`, `azureDevOps.serviceIdentity`,
   `azureDevOps.webhookUserSetting` and `azureDevOps.webhookPasswordSetting` are required. They name the sync's own identities
   and the settings that hold the webhook credentials. A configuration without them no longer loads.
+- `host.json` sets the queue retry: `maxDequeueCount` 10 and `visibilityTimeout` one minute (ADR 0010).
+
+
+### Fixed
+
+- A failure while the webhook body is read is answered with 503 instead of an unhandled 500 (ADR 0007).
+- The Jira and ADO clients are transient, so the handler lifetime of `IHttpClientFactory` applies. The processors are
+  transient for the same reason.
+- `WebhookSecrets` and `SyncHostSettings` print no value in `ToString()`.
