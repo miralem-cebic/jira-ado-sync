@@ -1,16 +1,20 @@
+using JiraAdoSync.Azure;
 using JiraAdoSync.Core.Delivery;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
 namespace JiraAdoSync.Functions;
 
-/// <summary>Processes the queued deliveries (ADR 0004). A throw makes the queue retry the message; the queue then moves it to the poison queue.</summary>
+/// <summary>
+/// Processes the queued deliveries (ADR 0004). A throw makes the queue retry the message. After the retry limit of
+/// host.json (ADR 0010) the message moves to the poison queue.
+/// </summary>
 public sealed class DeliveryProcessorFunction(DeliveryProcessor processor, ILogger<DeliveryProcessorFunction> logger)
 {
     /// <summary>Processes one delivery message.</summary>
     [Function("ProcessDelivery")]
     public async Task RunAsync(
-        [QueueTrigger(SyncNames.DeliveryQueue, Connection = SyncNames.StorageConnectionSetting)] string message,
+        [QueueTrigger(StorageNames.DeliveryQueue, Connection = SyncNames.StorageConnectionSetting)] string message,
         CancellationToken cancellationToken)
     {
         var delivery = DeliveryMessageJson.Deserialize(message);
@@ -28,7 +32,12 @@ public sealed class DeliveryProcessorFunction(DeliveryProcessor processor, ILogg
 
             case DeliveryOutcome.RetryLater retry:
                 SyncLog.DeliveryRetried(logger, delivery.Source, retry.SourceItemId, delivery.BlobName);
-                throw new InvalidOperationException("Another writer saved the pair first. The queue retries the delivery.");
+                break;
+        }
+
+        if (DeliveryRetry.IsRequired(outcome))
+        {
+            throw new InvalidOperationException("Another writer saved the pair first. The queue retries the delivery.");
         }
     }
 }

@@ -4,5 +4,11 @@
     "logLevel": {
       "default": "Information"
     }
+  },
+  "extensions": {
+    "queues": {
+      "maxDequeueCount": 10,
+      "visibilityTimeout": "00:01:00"
+    }
   }
 }

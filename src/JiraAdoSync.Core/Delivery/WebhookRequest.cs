@@ -15,7 +15,11 @@ public sealed record WebhookRequest(Side Source, ReadOnlyMemory<byte> Body, stri
 /// <param name="JiraSecret">The secret of the Jira webhook.</param>
 /// <param name="AdoUserName">The user name configured in the ADO service hook.</param>
 /// <param name="AdoPassword">The password configured in the ADO service hook.</param>
-public sealed record WebhookSecrets(string JiraSecret, string AdoUserName, string AdoPassword);
+public sealed record WebhookSecrets(string JiraSecret, string AdoUserName, string AdoPassword)
+{
+    /// <summary>Prints no value, so that a log line or a debugger view cannot show a secret.</summary>
+    public override string ToString() => "WebhookSecrets { redacted }";
+}
 
 /// <summary>
 /// The identities the sync writes as. The processor treats a change made by one of them as an echo of its own write.
