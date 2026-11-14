@@ -35,7 +35,8 @@ internal sealed class StubHttpHandler : HttpMessageHandler
             request.Method,
             request.RequestUri!.PathAndQuery,
             body,
-            request.Content?.Headers.ContentType?.MediaType));
+            request.Content?.Headers.ContentType?.MediaType,
+            request.Headers.Authorization?.ToString()));
 
         if (_replies.Count == 0)
         {
@@ -46,7 +47,12 @@ internal sealed class StubHttpHandler : HttpMessageHandler
     }
 }
 
-internal sealed record CapturedRequest(HttpMethod Method, string PathAndQuery, string? Body, string? ContentType);
+internal sealed record CapturedRequest(
+    HttpMethod Method,
+    string PathAndQuery,
+    string? Body,
+    string? ContentType,
+    string? Authorization);
 
 /// <summary>Records the waits instead of sleeping, and runs them at once.</summary>
 internal sealed class RecordingTimeProvider : TimeProvider
