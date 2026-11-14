@@ -40,6 +40,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `SkipReason.NotLinked`: a change to an item without a stored pair is skipped. Creating the item on the other side is
   Phase 3.
 
+- Webhook authentication (`WebhookAuthenticator`, ADR 0006): Jira's HMAC-SHA256 signature over the raw body and the
+  ADO basic credentials, both compared in constant time. Malformed headers are rejected without an exception.
+- Outbound retry policy (`RetryingHandler`, ADR 0005): retries a 429 for every method, 502, 503 and 504 for reads only,
+  honours `Retry-After` up to 30 seconds and makes at most four attempts.
+- Jira and Azure DevOps REST clients (`JiraClient`, `AdoClient`) in the new `JiraAdoSync.Adapters` project. They update
+  the issue and transition it, and read the work item revision and send it in the JSON Patch test. Their tests use the
+  documented response shapes.
+
 ### Changed
 
 - engineering-baseline v0.2.0: the `conformance` job is pinned to the release commit, and Dependabot moves the pin.

@@ -97,7 +97,7 @@ Secrets never live in the config file.
 - **ADO:** Managed Identity of the Function, granted access to the ADO organization. A PAT is supported for local testing only.
 - **Webhook authentication:** per source. Jira signs deliveries of admin webhooks that have a secret with an HMAC in the
   `X-Hub-Signature` header. ADO sends basic authentication, which must use HTTPS. Requests without a valid credential are
-  rejected. The exact check is decided in a later ADR.
+  rejected. The exact checks are in ADR 0006.
 
 ## 10. Testing
 
@@ -109,4 +109,4 @@ Secrets never live in the config file.
 
 - Whether Jira webhooks should be registered per project or globally (depends on the admin rights of the user installing it).
 - Whether iteration sync should map Jira sprints to ADO iterations by name or by a config table.
-- Retry strategy for ADO rate limits (429) and Jira rate limits.
+- Retry strategy: decided in ADR 0005. Open: the status code of a failed `/rev` test, which needs a real response.

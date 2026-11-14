@@ -60,20 +60,22 @@ not written back.
 - [ ] Check `config.example.json` against `config.schema.json` in a test, so the schema (for editors) and the loader
   (authoritative) cannot drift once this phase adds settings (webhook secrets, the sync's own Jira account and ADO
   identity). .NET has no JSON Schema validator: needs a decision on a package (`docs/dependencies.md`) or another way
-- [ ] Jira REST client (API v3): read issue, update summary and description, list transitions and transition; API
-  token of a dedicated service account
-- [ ] ADO REST client (7.1): read work item, JSON Patch with the `/rev` test; managed identity, PAT for local testing
-  only
-- [ ] Retry strategy (ADR, DESIGN.md section 11): back off on rate limits (429, honour `Retry-After`) on both sides.
-  When the `/rev` test fails, read the item again and let the engine decide again instead of overwriting. Confirm the
-  status code of a failed test with a real response
-- [ ] Contract tests for both clients against recorded responses (DESIGN.md, section 10)
+- [~] Jira REST client (API v3) in `JiraAdoSync.Adapters`: read the issue status, update summary and description, list
+  transitions and transition. The host sets the service account's API token on the `HttpClient`. Recorded responses come
+  in Phase 2
+- [~] ADO REST client (7.1) in `JiraAdoSync.Adapters`: read the revision, JSON Patch with the `/rev` test. The host sets
+  managed identity or the PAT on the `HttpClient`
+- [~] Retry strategy: decided in ADR 0005 and implemented in `RetryingHandler`. Open: the status code of a failed `/rev`
+  test, which needs a real response. The clients throw on any failure, so the queue reads the item again and decides
+  again (ADR 0004)
+- [~] Contract tests for both clients against the documented response shapes (DESIGN.md, section 10). Recorded responses
+  replace them in Phase 2
 - [ ] State store on Azure Table Storage: table `SyncItems` as in DESIGN.md section 4. Writes use the entity ETag, so
   two concurrent events for one pair cannot both win
 - [ ] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook,
   and a queue trigger for the processor (ADR 0004)
-- [ ] Webhook authentication: requests without a valid secret are rejected (shared secret or HMAC, per source;
-  DESIGN.md section 9)
+- [~] Webhook authentication: decided in ADR 0006, and the checks are in `WebhookAuthenticator`, tested. Open: the host
+  rejects requests with `401` before it parses or stores them
 - [ ] Security headers on every response: `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
   `X-Content-Type-Options: nosniff`, `Cache-Control: no-store` and HSTS. The baseline rules `HOS-009..012`
   (proposed, surface `api`) then pass
