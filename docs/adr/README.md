@@ -11,3 +11,5 @@ The initial design (Azure Function, Table Storage, loop prevention, last write w
 | --- | --- | --- |
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
 | [0002](0002-dotnet-10-with-the-baseline-build-rules.md) | .NET 10 with the engineering-baseline build rules | Accepted |
+| [0003](0003-receive-changes-by-webhook.md) | Receive changes by webhook, not by polling | Accepted |
+| [0004](0004-acknowledge-and-enqueue-deliveries.md) | Acknowledge and enqueue webhook deliveries | Accepted |

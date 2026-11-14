@@ -34,8 +34,11 @@
 
 Components:
 
-- **Jira webhook receiver:** HTTP-triggered function. Validates the request, then enqueues or processes the event.
+- **Jira webhook receiver:** HTTP-triggered function. Authenticates the request, stores the raw delivery in Blob Storage
+  and enqueues it, then answers `202` (ADR 0004). Changes arrive by webhook, not by polling (ADR 0003).
 - **ADO service hook receiver:** HTTP-triggered function, same pattern.
+- **Processor:** queue-triggered function. Reads the stored delivery, parses it and runs the sync processor. A failure
+  that can succeed later is thrown, so the queue retries it (ADR 0004).
 - **Sync engine:** pure logic that maps a source change to a target change using the config. It has no direct dependency on either API, which makes it testable.
 - **Adapters:** `JiraClient` and `AdoClient`, thin REST wrappers.
 - **State store:** Azure Table Storage. One row per synced item.
@@ -92,7 +95,9 @@ Secrets never live in the config file.
 
 - **Jira:** API token of a dedicated service account. Stored as an app setting or in Key Vault.
 - **ADO:** Managed Identity of the Function, granted access to the ADO organization. A PAT is supported for local testing only.
-- **Webhook authentication:** a shared secret in the URL or an HMAC header, depending on the source. Requests without a valid secret are rejected.
+- **Webhook authentication:** per source. Jira signs deliveries of admin webhooks that have a secret with an HMAC in the
+  `X-Hub-Signature` header. ADO sends basic authentication, which must use HTTPS. Requests without a valid credential are
+  rejected. The exact check is decided in a later ADR.
 
 ## 10. Testing
 
