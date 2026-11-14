@@ -49,6 +49,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   documented response shapes.
 - Schema test (`ConfigSchemaTests`): the shipped example, `config/config.schema.json` and the loader must agree on
   14 cases. NJsonSchema is a test-only dependency.
+- Webhook receiver (`WebhookReceiver`) and delivery processor (`DeliveryProcessor`) behind the ports
+  `IRawDeliveryStore` and `IDeliveryDispatcher` (ADR 0004). The receiver authenticates, rejects a body that is not JSON,
+  stores the body under its source and SHA-256, enqueues a message and answers. The processor parses the stored body,
+  maps the project and runs the sync. A redelivery keeps one stored body, and a lost save race is retried.
+- Response codes of the receiver (ADR 0007): 202, 401, 400 and 503. The receiver never answers 500, 429 or 410.
 
 ### Changed
 
