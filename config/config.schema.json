@@ -16,7 +16,7 @@
       "properties": {
         "siteUrl": {
           "type": "string",
-          "pattern": "^https://",
+          "pattern": "^https://[^/\\s]+",
           "description": "Base URL of the Jira Cloud site, e.g. https://example.atlassian.net"
         },
         "authMode": {
@@ -26,6 +26,7 @@
         "apiTokenSetting": {
           "type": "string",
           "minLength": 1,
+          "pattern": "\\S",
           "description": "Name of the app setting or environment variable that holds the API token."
         }
       }
@@ -39,6 +40,7 @@
         "organization": {
           "type": "string",
           "minLength": 1,
+          "pattern": "\\S",
           "description": "Azure DevOps organization name, not the full URL."
         },
         "authMode": {
@@ -48,16 +50,14 @@
         "patSetting": {
           "type": "string",
           "minLength": 1,
+          "pattern": "\\S",
           "description": "Name of the app setting that holds the PAT. Required when authMode is pat."
         }
       },
-      "if": {
-        "properties": { "authMode": { "const": "pat" } },
-        "required": ["authMode"]
-      },
-      "then": {
-        "required": ["patSetting"]
-      }
+      "anyOf": [
+        { "properties": { "authMode": { "enum": ["managedIdentity"] } } },
+        { "required": ["patSetting"] }
+      ]
     },
 
     "conflictPolicy": {
@@ -88,23 +88,26 @@
           "jiraProject": {
             "type": "string",
             "minLength": 1,
+            "pattern": "\\S",
             "description": "Jira project key, e.g. PROJ. Must be unique across mappings."
           },
           "adoProject": {
             "type": "string",
             "minLength": 1,
+            "pattern": "\\S",
             "description": "Azure DevOps project name."
           },
           "areaPath": {
             "type": "string",
             "minLength": 1,
+            "pattern": "\\S",
             "description": "Area path for work items created from Jira, e.g. MyProject\\Team A."
           },
           "statusMap": {
             "type": "object",
             "minProperties": 1,
             "description": "Jira status name to ADO state name. Must be one-to-one.",
-            "additionalProperties": { "type": "string", "minLength": 1 }
+            "additionalProperties": { "type": "string", "minLength": 1, "pattern": "\\S" }
           }
         }
       }

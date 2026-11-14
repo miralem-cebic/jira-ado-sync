@@ -5,8 +5,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Test the shipped example so it cannot drift from the loader. -->
+    <PackageReference Include="NJsonSchema" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test the shipped example and schema so they cannot drift from the loader. -->
     <None Include="../../config/config.example.json" Link="config.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../config/config.schema.json" Link="config.schema.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -47,6 +47,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Jira and Azure DevOps REST clients (`JiraClient`, `AdoClient`) in the new `JiraAdoSync.Adapters` project. They update
   the issue and transition it, and read the work item revision and send it in the JSON Patch test. Their tests use the
   documented response shapes.
+- Schema test (`ConfigSchemaTests`): the shipped example, `config/config.schema.json` and the loader must agree on
+  14 cases. NJsonSchema is a test-only dependency.
 
 ### Changed
 
@@ -56,3 +58,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - .NET 10 instead of .NET 8, xUnit v3 on Microsoft.Testing.Platform instead of xUnit v2 (ADR 0002).
 - `JiraSettings.SiteUrl` is a `Uri`.
 - Configuration DTOs are private and read with a source-generated `JsonSerializerContext`.
+- Configuration schema aligned with the loader: a `pat` authentication needs `patSetting`, whitespace-only names are
+  rejected, and `https://` needs a host. The loader rejects an empty ADO state in a status map.
