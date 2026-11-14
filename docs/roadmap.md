@@ -73,10 +73,15 @@ not written back.
   replace them in Phase 2
 - [ ] State store on Azure Table Storage: table `SyncItems` as in DESIGN.md section 4. Writes use the entity ETag, so
   two concurrent events for one pair cannot both win
+- [x] Receiver and processor behind ports (ADR 0004, ADR 0007): `WebhookReceiver` authenticates, checks that the body is
+  JSON, stores it under `source/SHA-256` and enqueues a message that names it. `DeliveryProcessor` loads it, parses it,
+  maps the project and runs the sync. A redelivery keeps one stored body. The Azure adapters for the ports come with the
+  host
 - [ ] Azure Functions host (isolated worker, .NET 10) with HTTP triggers for the Jira webhook and the ADO service hook,
   and a queue trigger for the processor (ADR 0004)
-- [~] Webhook authentication: decided in ADR 0006, and the checks are in `WebhookAuthenticator`, tested. Open: the host
-  rejects requests with `401` before it parses or stores them
+- [~] Webhook authentication: decided in ADR 0006. `WebhookAuthenticator` and `WebhookReceiver` check the requests, and
+  both are tested. Open: the host maps the result with `ToHttpStatusCode` and catches exceptions, so that no `500`
+  leaves the Function
 - [ ] Security headers on every response: `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
   `X-Content-Type-Options: nosniff`, `Cache-Control: no-store` and HSTS. The baseline rules `HOS-009..012`
   (proposed, surface `api`) then pass
