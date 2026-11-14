@@ -21,6 +21,13 @@ public sealed class ProjectMapping
     /// <summary>Jira status name → ADO state name.</summary>
     public required IReadOnlyDictionary<string, string> StatusMap { get; init; }
 
+    /// <summary>
+    /// Jira status names that are tolerated: a Jira event in one of these states syncs title, description and
+    /// assignee, but no status is written to ADO. A status must appear in either <see cref="StatusMap"/> or here,
+    /// never both.
+    /// </summary>
+    public IReadOnlyCollection<string> IgnoreJiraStates { get; init; } = Array.Empty<string>();
+
     /// <summary>Which fields take part in the sync for this mapping.</summary>
     public FeatureFlags Features { get; init; } = new();
 
@@ -49,7 +56,31 @@ public sealed class ProjectMapping
             }
         }
 
+        foreach (var ignored in IgnoreJiraStates)
+        {
+            if (StatusMap.ContainsKey(ignored))
+            {
+                errors.Add(
+                    $"{Id}: Jira status '{ignored}' is both mapped and ignored. " +
+                    "A status must appear in either statusMap or ignoreJiraStates, not both.");
+            }
+        }
+
         return errors;
+    }
+
+    /// <summary>True if <paramref name="jiraStatus"/> is on the ignore list (case-sensitive).</summary>
+    public bool IsIgnoredJiraStatus(string jiraStatus)
+    {
+        foreach (var ignored in IgnoreJiraStates)
+        {
+            if (string.Equals(ignored, jiraStatus, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Translates a Jira status name into the ADO state name, or null if unmapped.</summary>

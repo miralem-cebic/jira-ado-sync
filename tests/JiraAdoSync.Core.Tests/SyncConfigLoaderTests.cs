@@ -177,6 +177,65 @@ public class SyncConfigLoaderTests
     }
 
     [Fact]
+    public void IgnoreJiraStatesAreLoaded()
+    {
+        var json = ValidJson.Replace(
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }",
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }, \"ignoreJiraStates\": [\"Backlog\", \"On Hold\"]",
+            StringComparison.Ordinal);
+
+        var result = SyncConfigLoader.Parse(json);
+
+        Assert.True(result.IsValid, string.Join("; ", result.Errors));
+        var mapping = result.Config!.ProjectMappings[0];
+        Assert.Equal(2, mapping.IgnoreJiraStates.Count);
+        Assert.True(mapping.IsIgnoredJiraStatus("On Hold"));
+        Assert.False(mapping.IsIgnoredJiraStatus("To Do"));
+    }
+
+    [Fact]
+    public void IgnoreJiraStatesOverlappingWithStatusMapIsRejected()
+    {
+        var json = ValidJson.Replace(
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }",
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }, \"ignoreJiraStates\": [\"To Do\"]",
+            StringComparison.Ordinal);
+
+        var result = SyncConfigLoader.Parse(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("both mapped and ignored", string.Join(" ", result.Errors), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DuplicateIgnoreJiraStatesAreRejected()
+    {
+        var json = ValidJson.Replace(
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }",
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }, \"ignoreJiraStates\": [\"On Hold\", \"On Hold\"]",
+            StringComparison.Ordinal);
+
+        var result = SyncConfigLoader.Parse(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("listed more than once", string.Join(" ", result.Errors), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BlankIgnoreJiraStateEntryIsRejected()
+    {
+        var json = ValidJson.Replace(
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }",
+            "\"statusMap\": { \"To Do\": \"New\", \"In Progress\": \"Active\", \"Done\": \"Closed\" }, \"ignoreJiraStates\": [\"   \"]",
+            StringComparison.Ordinal);
+
+        var result = SyncConfigLoader.Parse(json);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("non-empty", string.Join(" ", result.Errors), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EmptyProjectMappingsAreRejected()
     {
         var json = """

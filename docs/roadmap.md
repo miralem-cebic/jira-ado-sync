@@ -94,8 +94,11 @@ the sync's own write ends as `EchoSuppressed` or `NoChange`. The core tests prov
 
 ## Phase 2: real systems
 
-- [!] Sandbox: one throwaway Jira project, one throwaway ADO project and a mapping between them. Blocked until the Jira
-  site URL and the ADO organization and projects are known; needed only for tests against real systems
+- [x] Sandbox: Jira project M51 on `elementar-analysensysteme.atlassian.net` and ADO project Neo on
+  `dev.azure.com/ElementarSoftware`. Mapping committed as `config/sandbox.json`; service-account identifiers stay
+  TBD until the accounts exist
+- [x] Tolerate Jira states that have no ADO counterpart: `ignoreJiraStates` on each mapping lets title, description
+  and assignee flow while an issue sits in an ignored state ([ADR 0011](adr/0011-tolerate-unmapped-jira-states.md))
 - [ ] Record one real delivery per event type (Jira webhook, ADO service hook) and keep it as a fixture without personal
   data. Confirm the `X-Hub-Signature` format of Jira (ADR 0006), and whether `resource.revision.fields` carries the full
   state. The ADO parser is defensive until then
@@ -171,6 +174,7 @@ Ongoing work outside the phases.
 | Retry strategy and limits | Phase 1 | DESIGN.md, section 11 |
 | Webhook authentication per source: decided, [ADR 0006](adr/0006-webhook-authentication.md) | Phase 1 | DESIGN.md, section 9 |
 | JSON Schema check in tests: NJsonSchema, decided (`docs/dependencies.md`) | Phase 1 | Loader and schema can drift |
-| Sandbox systems: Jira site, ADO organization and projects | Phase 2 | Needed for tests against real systems |
+| Sandbox systems: Jira site, ADO organization and projects: decided, M51 ↔ Neo (`config/sandbox.json`) | Phase 2 | Needed for tests against real systems |
+| Tolerating unmapped Jira states: decided, [ADR 0011](adr/0011-tolerate-unmapped-jira-states.md) | Phase 2 | DESIGN.md, section 6 |
 | Jira webhook per project or global | Phase 2 | DESIGN.md, section 11 |
 | Iteration mapping by name or by table | Phase 3 | DESIGN.md, section 11 |

@@ -36,7 +36,11 @@
         "To Do": "New",
         "In Progress": "Active",
         "Done": "Closed"
-      }
+      },
+      "ignoreJiraStates": [
+        "Backlog",
+        "On Hold"
+      ]
     }
   ]
 }

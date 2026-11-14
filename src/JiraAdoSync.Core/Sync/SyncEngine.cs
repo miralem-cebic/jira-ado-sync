@@ -27,16 +27,27 @@ public static class SyncEngine
         var features = mapping.Features;
 
         // 2. Translate the status into the canonical (Jira) vocabulary.
+        //    A Jira event in an ignored state drops status from the canonical item, so title,
+        //    description and assignee still flow and no ADO state is written (ADR 0011).
         string? jiraStatus = null;
         if (features.Status)
         {
-            jiraStatus = evt.Source == Side.Ado
-                ? mapping.ToJiraStatus(evt.Status ?? string.Empty)
-                : MapJiraStatus(evt.Status, mapping);
-
-            if (jiraStatus is null)
+            if (evt.Source == Side.Jira
+                && evt.Status is not null
+                && mapping.IsIgnoredJiraStatus(evt.Status))
             {
-                return new SyncDecision.Skip(SkipReason.UnmappedStatus);
+                jiraStatus = null;
+            }
+            else
+            {
+                jiraStatus = evt.Source == Side.Ado
+                    ? mapping.ToJiraStatus(evt.Status ?? string.Empty)
+                    : MapJiraStatus(evt.Status, mapping);
+
+                if (jiraStatus is null)
+                {
+                    return new SyncDecision.Skip(SkipReason.UnmappedStatus);
+                }
             }
         }
 

@@ -8,20 +8,23 @@ public class SyncEngineTests
 {
     private static readonly DateTimeOffset T0 = new(2026, 1, 1, 10, 0, 0, TimeSpan.Zero);
 
-    private static ProjectMapping Mapping(FeatureFlags? features = null) => new()
-    {
-        Id = "test",
-        JiraProject = "PROJ",
-        AdoProject = "Project",
-        AreaPath = "Project\\Team",
-        StatusMap = new Dictionary<string, string>
+    private static ProjectMapping Mapping(
+        FeatureFlags? features = null,
+        IReadOnlyCollection<string>? ignoreJiraStates = null) => new()
         {
-            ["To Do"] = "New",
-            ["In Progress"] = "Active",
-            ["Done"] = "Closed",
-        },
-        Features = features ?? new FeatureFlags(),
-    };
+            Id = "test",
+            JiraProject = "PROJ",
+            AdoProject = "Project",
+            AreaPath = "Project\\Team",
+            StatusMap = new Dictionary<string, string>
+            {
+                ["To Do"] = "New",
+                ["In Progress"] = "Active",
+                ["Done"] = "Closed",
+            },
+            IgnoreJiraStates = ignoreJiraStates ?? Array.Empty<string>(),
+            Features = features ?? new FeatureFlags(),
+        };
 
     private static SyncEvent JiraEvent(
         string title = "Hello",
@@ -177,5 +180,93 @@ public class SyncEngineTests
     public void ValidMappingHasNoErrors()
     {
         Assert.Empty(Mapping().Validate());
+    }
+
+    [Fact]
+    public void IgnoredJiraStatusLetsTitleFlowButDropsStatus()
+    {
+        // The Jira issue sits in an ignored state (for example On Hold). A title edit should
+        // still reach ADO, but the canonical item carries no status so no transition is written.
+        var mapping = Mapping(ignoreJiraStates: ["On Hold"]);
+
+        var decision = SyncEngine.Decide(
+            JiraEvent(title: "edited", status: "On Hold"),
+            state: null,
+            mapping);
+
+        var apply = Assert.IsType<SyncDecision.Apply>(decision);
+        Assert.Equal("edited", apply.Item.Title);
+        Assert.Null(apply.Item.JiraStatus);
+    }
+
+    [Fact]
+    public void IgnoredJiraStatusWithNoOtherChangeIsNoChange()
+    {
+        var mapping = Mapping(ignoreJiraStates: ["On Hold"]);
+        var first = Assert.IsType<SyncDecision.Apply>(
+            SyncEngine.Decide(JiraEvent(title: "same", status: "On Hold"), state: null, mapping));
+
+        var decision = SyncEngine.Decide(
+            JiraEvent(title: "same", status: "On Hold", at: T0.AddMinutes(1)),
+            StateFrom(first, T0),
+            mapping);
+
+        Assert.Equal(new SyncDecision.Skip(SkipReason.NoChange), decision);
+    }
+
+    [Fact]
+    public void TransitionIntoIgnoredStateDoesNotBlockTitleChange()
+    {
+        // The item was synced while the Jira status was mapped. It now moves into an ignored
+        // state with a title edit. The engine must apply the title change without a status.
+        var mapping = Mapping(ignoreJiraStates: ["On Hold"]);
+        var mapped = Assert.IsType<SyncDecision.Apply>(
+            SyncEngine.Decide(JiraEvent(title: "before", status: "In Progress"), state: null, mapping));
+
+        var decision = SyncEngine.Decide(
+            JiraEvent(title: "after", status: "On Hold", at: T0.AddMinutes(1)),
+            StateFrom(mapped, T0),
+            mapping);
+
+        var apply = Assert.IsType<SyncDecision.Apply>(decision);
+        Assert.Equal("after", apply.Item.Title);
+        Assert.Null(apply.Item.JiraStatus);
+    }
+
+    [Fact]
+    public void EchoFromAnIgnoredStateIsStillSuppressed()
+    {
+        // Loop prevention must not be weakened by the ignore list: the service identity's own
+        // write that lands back during an ignored interval still ends as EchoSuppressed.
+        var mapping = Mapping(ignoreJiraStates: ["On Hold"]);
+
+        var decision = SyncEngine.Decide(
+            JiraEvent(status: "On Hold", echo: true),
+            state: null,
+            mapping);
+
+        Assert.Equal(new SyncDecision.Skip(SkipReason.EchoSuppressed), decision);
+    }
+
+    [Fact]
+    public void MappingWithJiraStatusInBothMapAndIgnoreListIsInvalid()
+    {
+        var mapping = new ProjectMapping
+        {
+            Id = "broken",
+            JiraProject = "PROJ",
+            AdoProject = "Project",
+            AreaPath = "Project",
+            StatusMap = new Dictionary<string, string>
+            {
+                ["To Do"] = "New",
+            },
+            IgnoreJiraStates = ["To Do"],
+        };
+
+        var errors = mapping.Validate();
+
+        Assert.Single(errors);
+        Assert.Contains("both mapped and ignored", errors[0], StringComparison.Ordinal);
     }
 }

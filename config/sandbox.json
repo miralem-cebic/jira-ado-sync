@@ -39,7 +39,13 @@
         "Test": "Resolved",
         "Closed": "Closed",
         "Rejected": "Removed"
-      }
+      },
+      "ignoreJiraStates": [
+        "Backlog",
+        "On Hold",
+        "Waiting for external",
+        "Waiting for Internal"
+      ]
     }
   ]
 }

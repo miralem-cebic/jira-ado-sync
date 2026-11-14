@@ -103,6 +103,7 @@ See `config/config.example.json`. Key points:
 
 - `projectMappings` defines which Jira project maps to which ADO project and area path.
 - `statusMap` maps Jira status names to ADO states. Workflows differ between teams, so this is always explicit. Unmapped statuses are logged and not synced.
+- `ignoreJiraStates` lists Jira status names that are tolerated: a Jira event in one of these states syncs title, description and assignee, but no status is written to ADO (ADR 0011). A status must appear in either `statusMap` or here, never both.
 - `linkTypeMap` maps Jira link types to ADO link types. Unmapped links are skipped.
 - `features` toggles each synced field.
 

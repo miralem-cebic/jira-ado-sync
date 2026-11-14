@@ -240,6 +240,34 @@ public static partial class SyncConfigLoader
                 }
             }
 
+            var ignoreJiraStates = Array.Empty<string>();
+            if (file.IgnoreJiraStates is not null)
+            {
+                var seenIgnored = new HashSet<string>(StringComparer.Ordinal);
+                var collected = new List<string>(file.IgnoreJiraStates.Count);
+                for (var j = 0; j < file.IgnoreJiraStates.Count; j++)
+                {
+                    var entry = file.IgnoreJiraStates[j];
+                    if (string.IsNullOrWhiteSpace(entry))
+                    {
+                        errors.Add($"{path}.ignoreJiraStates[{j}]: entries must be non-empty.");
+                        valid = false;
+                        continue;
+                    }
+
+                    if (!seenIgnored.Add(entry))
+                    {
+                        errors.Add($"{path}.ignoreJiraStates[{j}]: '{entry}' is listed more than once.");
+                        valid = false;
+                        continue;
+                    }
+
+                    collected.Add(entry);
+                }
+
+                ignoreJiraStates = collected.ToArray();
+            }
+
             if (!seenJiraProjects.Add(file.JiraProject))
             {
                 errors.Add($"{path}.jiraProject: '{file.JiraProject}' is mapped more than once.");
@@ -254,6 +282,7 @@ public static partial class SyncConfigLoader
                 AdoProject = file.AdoProject,
                 AreaPath = file.AreaPath,
                 StatusMap = new Dictionary<string, string>(file.StatusMap, StringComparer.Ordinal),
+                IgnoreJiraStates = ignoreJiraStates,
                 Features = features,
             };
 
@@ -355,5 +384,7 @@ public static partial class SyncConfigLoader
         public string? AreaPath { get; set; }
 
         public Dictionary<string, string>? StatusMap { get; set; }
+
+        public List<string>? IgnoreJiraStates { get; set; }
     }
 }

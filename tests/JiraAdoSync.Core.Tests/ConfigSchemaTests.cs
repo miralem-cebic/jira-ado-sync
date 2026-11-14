@@ -42,6 +42,9 @@ public class ConfigSchemaTests
         yield return Case("ADO webhook password setting missing", Variant(n => Obj(n, "azureDevOps").Remove("webhookPasswordSetting")), valid: false);
         yield return Case("no project mapping", Variant(n => n["projectMappings"] = new JsonArray()), valid: false);
         yield return Case("conflict policy missing", Variant(n => n.Remove("conflictPolicy")), valid: false);
+        yield return Case("ignoreJiraStates with valid entries", Variant(n => Mapping(n)["ignoreJiraStates"] = new JsonArray("Backlog", "On Hold")), valid: true);
+        yield return Case("ignoreJiraStates with an empty entry", Variant(n => Mapping(n)["ignoreJiraStates"] = new JsonArray("Backlog", "")), valid: false);
+        yield return Case("ignoreJiraStates with duplicates", Variant(n => Mapping(n)["ignoreJiraStates"] = new JsonArray("On Hold", "On Hold")), valid: false);
     }
 
     [Theory]

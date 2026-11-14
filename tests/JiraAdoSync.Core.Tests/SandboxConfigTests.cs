@@ -1,4 +1,3 @@
-using System.Text.Json.Nodes;
 using JiraAdoSync.Core.Config;
 using NJsonSchema;
 
@@ -17,7 +16,7 @@ public class SandboxConfigTests
     [Fact]
     public async Task SandboxConfigPassesSchema()
     {
-        var schema = await JsonSchema.FromJsonAsync(SchemaText).ConfigureAwait(true);
+        var schema = await JsonSchema.FromJsonAsync(SchemaText, TestContext.Current.CancellationToken).ConfigureAwait(true);
         var errors = schema.Validate(SandboxText);
         Assert.True(errors.Count == 0, $"sandbox.json fails schema: {string.Join("; ", errors)}");
     }
@@ -38,5 +37,18 @@ public class SandboxConfigTests
         Assert.Equal("M51", mapping.JiraProject);
         Assert.Equal("Neo", mapping.AdoProject);
         Assert.Equal("Neo", mapping.AreaPath);
+    }
+
+    [Fact]
+    public void SandboxConfigIgnoresTheFourWaitingStates()
+    {
+        var result = SyncConfigLoader.Parse(SandboxText);
+        Assert.True(result.IsValid);
+        var mapping = result.Config!.ProjectMappings[0];
+        Assert.True(mapping.IsIgnoredJiraStatus("Backlog"));
+        Assert.True(mapping.IsIgnoredJiraStatus("On Hold"));
+        Assert.True(mapping.IsIgnoredJiraStatus("Waiting for external"));
+        Assert.True(mapping.IsIgnoredJiraStatus("Waiting for Internal"));
+        Assert.False(mapping.IsIgnoredJiraStatus("To Do"));
     }
 }

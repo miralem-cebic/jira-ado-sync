@@ -19,3 +19,4 @@ The initial design (Azure Function, Table Storage, loop prevention, last write w
 | [0008](0008-azure-functions-host.md) | Azure Functions host | Accepted |
 | [0009](0009-maximum-webhook-body-size.md) | Maximum size of a webhook body | Accepted |
 | [0010](0010-delivery-queue-retry-and-poison.md) | Retry window and poison queue of the delivery queue | Accepted |
+| [0011](0011-tolerate-unmapped-jira-states.md) | Tolerate unmapped Jira states with ignoreJiraStates | Accepted |
