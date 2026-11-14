@@ -1,0 +1,45 @@
+{
+  "$schema": "./config.schema.json",
+
+  "jira": {
+    "siteUrl": "https://elementar-analysensysteme.atlassian.net",
+    "authMode": "apiToken",
+    "apiTokenSetting": "JIRA_API_TOKEN",
+    "accountEmail": "jira-ado-sync@elementar-analysensysteme.de",
+    "serviceAccountId": "TBD-create-jira-service-account",
+    "webhookSecretSetting": "JIRA_WEBHOOK_SECRET"
+  },
+
+  "azureDevOps": {
+    "organization": "ElementarSoftware",
+    "authMode": "pat",
+    "patSetting": "ADO_PAT",
+    "serviceIdentity": "jira-ado-sync",
+    "webhookUserSetting": "ADO_WEBHOOK_USER",
+    "webhookPasswordSetting": "ADO_WEBHOOK_PASSWORD"
+  },
+
+  "conflictPolicy": "lastWriteWins",
+
+  "features": {
+    "title": true,
+    "description": true,
+    "status": true,
+    "assignee": false
+  },
+
+  "projectMappings": [
+    {
+      "jiraProject": "M51",
+      "adoProject": "Neo",
+      "areaPath": "Neo",
+      "statusMap": {
+        "To Do": "New",
+        "In Progress": "Active",
+        "Test": "Resolved",
+        "Closed": "Closed",
+        "Rejected": "Removed"
+      }
+    }
+  ]
+}

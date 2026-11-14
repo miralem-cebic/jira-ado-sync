@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Sandbox configuration (`config/sandbox.json`) for the M51 (Jira) ↔ Neo (Azure DevOps) pair: site URL, organization,
+  area path `Neo` and a one-to-one status map (`To Do`→`New`, `In Progress`→`Active`, `Test`→`Resolved`,
+  `Closed`→`Closed`, `Rejected`→`Removed`). Service-account identifiers stay as TBD placeholders until the accounts
+  exist. A new test (`SandboxConfigTests`) keeps the file in step with the schema and the loader.
 - Roadmap (`docs/roadmap.md`): phases from the walking skeleton (Functions host, REST clients, Table Storage state,
   webhook authentication) to real systems, breadth (creating items, assignee, comments, links, iterations) and
   conflict policies, with releases, open decisions and what is not planned.
