@@ -75,6 +75,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- .NET SDK 11.0.100 (`global.json`) and `Microsoft.Extensions.Hosting` / `Microsoft.Extensions.Http` 11.0.0. The target
+  stays `net10.0`. The tests use `JsonElement.Parse` instead of `JsonDocument.Parse(...).RootElement`, which the new
+  analyzer CA2026 reports because it leaks the document.
 - engineering-baseline v0.2.0: the `conformance` job is pinned to the release commit, and Dependabot moves the pin.
   `baseline.json` declares `"surface": "api"`, which replaces the four HOS waivers with the API header rules
   `HOS-009..012` (proposed; open until the Functions host sets the headers).
