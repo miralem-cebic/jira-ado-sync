@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Guide for the Jira button "Sync to ADO" (`docs/jira-sync-button.md`): an Automation rule that adds the label `sync-ado`,
+  so that only chosen issues are synced. The check in the sync itself is on the roadmap.
 - Roadmap (`docs/roadmap.md`): phases from the walking skeleton (Functions host, REST clients, Table Storage state,
   webhook authentication) to real systems, breadth (creating items, assignee, comments, links, iterations) and
   conflict policies, with releases, open decisions and what is not planned.

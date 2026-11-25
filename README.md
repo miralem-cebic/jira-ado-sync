@@ -243,7 +243,7 @@ storage is not implemented yet.
 | `tests/` | Unit and integration tests (xUnit v3), one project per layer |
 | `config/` | JSON Schema and example configuration |
 | `scripts/` | `verify.sh` (the gate), `smoke-local.py`, `replay-poison.py`, `apply-repo-settings.sh` |
-| `docs/` | [Design](docs/DESIGN.md), [roadmap](docs/roadmap.md), [running locally](docs/running-locally.md), [decisions](docs/adr/README.md), [runbooks](docs/runbooks/poison-queue.md), [dependencies](docs/dependencies.md) |
+| `docs/` | [Design](docs/DESIGN.md), [roadmap](docs/roadmap.md), [running locally](docs/running-locally.md), [choosing what is synced](docs/jira-sync-button.md), [decisions](docs/adr/README.md), [runbooks](docs/runbooks/poison-queue.md), [dependencies](docs/dependencies.md) |
 
 The working agreement (test first, invariants, definition of done) is in [CLAUDE.md](CLAUDE.md).
 

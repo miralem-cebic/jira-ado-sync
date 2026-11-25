@@ -119,6 +119,10 @@ the sync's own write ends as `EchoSuppressed` or `NoChange`. The core tests prov
 
 Each item brings its configuration, schema and loader validation along; nothing is configured before it works.
 
+- [ ] Opt-in by label: the item is created only for Jira issues with the label `sync-ado`, set by the Automation button
+  ([docs/jira-sync-button.md](jira-sync-button.md)). The label gates creation only; removing it does not unlink. The
+  label name is configuration per mapping. Needs an ADR (and an ADO counterpart, for example a tag) and an echo test:
+  the label change made by Automation is not the sync's own identity and must pass
 - [ ] Create the item on the other side when no pair exists: issue type and work item type per mapping, area path from
   the mapping, the new pair stored
 - [ ] Assignee: a user mapping from Jira `accountId` to ADO identity in the configuration. Until then the parsers
