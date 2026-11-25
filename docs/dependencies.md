@@ -20,8 +20,8 @@ uses these packages. The core and the Jira and ADO adapters use none of them. Th
 | `Microsoft.Azure.Functions.Worker.Extensions.Http` 3.3.0 | HTTP triggers of the two webhook endpoints | None | MIT |
 | `Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues` 5.5.5 | The queue trigger of the processor | None | MIT |
 | `Microsoft.Azure.Functions.Worker.Sdk` 2.1.0 | Build-time generation of the function metadata. Not shipped at run time | None | MIT |
-| `Microsoft.Extensions.Hosting` 10.0.15 | The generic host that the worker runs in, with dependency injection and hosted services | None | MIT |
-| `Microsoft.Extensions.Http` 10.0.15 | Typed `HttpClient`s with the handler chain of the retry policy and the authorization | Creating `HttpClient` by hand: rejected, because it leaks sockets and does not compose handlers | MIT |
+| `Microsoft.Extensions.Hosting` 11.0.0 | The generic host that the worker runs in, with dependency injection and hosted services | None | MIT |
+| `Microsoft.Extensions.Http` 11.0.0 | Typed `HttpClient`s with the handler chain of the retry policy and the authorization | Creating `HttpClient` by hand: rejected, because it leaks sockets and does not compose handlers | MIT |
 | `Grpc.Net.Client`, `Grpc.Core.Api`, `Google.Protobuf` (transitive, through `Worker.Grpc`) | The channel to the Functions host | None: required by the worker | Apache-2.0, Apache-2.0, BSD-3-Clause |
 
 ## Build and test

@@ -81,7 +81,7 @@ public class RoundTripTests
         var decision = Assert.IsType<SyncDecision.Apply>(SyncEngine.Decide(jira.Event, null, Mapping));
 
         // What we would send to ADO.
-        var patch = JsonDocument.Parse(AdoPatchBuilder.Build(5, decision.Item, Mapping)).RootElement;
+        var patch = JsonElement.Parse(AdoPatchBuilder.Build(5, decision.Item, Mapping));
         Assert.Equal("test", patch[0].GetProperty("op").GetString());
         Assert.Equal(5, patch[0].GetProperty("value").GetInt32());
         Assert.Equal("Active", patch[3].GetProperty("value").GetString());
@@ -142,7 +142,7 @@ public class RoundTripTests
     {
         var item = new CanonicalItem("Title", "Line one\nLine two", "In Progress", null);
 
-        var body = JsonDocument.Parse(JiraRequests.BuildIssueUpdate(item)).RootElement;
+        var body = JsonElement.Parse(JiraRequests.BuildIssueUpdate(item));
 
         var description = body.GetProperty("fields").GetProperty("description");
         Assert.Equal("doc", description.GetProperty("type").GetString());
